@@ -3,6 +3,7 @@
 import {chromium} from 'playwright'
 import {spawn} from 'node:child_process'
 import {mkdirSync} from 'node:fs'
+import assert from 'node:assert/strict'
 
 const OUT = process.env.SHOTS || 'test/shots'
 mkdirSync(OUT, {recursive: true})
@@ -142,6 +143,23 @@ try {
     await head.locator('.timeline li.undone').first().waitFor()
     await shot(head, '11-timeline')
   })
+  await step('Sheffield page: download instructions and import an assistant menu.json', async () => {
+    await head.keyboard.press('Escape')
+    await head.locator('.tabs button', {hasText: 'Menu'}).click()
+    await head.getByRole('button', {name: 'Sheffield'}).click()
+    await head.getByText('Good day. I work through whichever chat assistant').waitFor()
+    const [download] = await Promise.all([head.waitForEvent('download'), head.getByRole('button', {name: 'Download instructions'}).click()])
+    assert(download.suggestedFilename() === 'sheffield-instructions.txt', 'instructions file name')
+    await shot(head, '12-sheffield')
+    const [chooser] = await Promise.all([head.waitForEvent('filechooser'), head.getByRole('button', {name: 'Import menu.json'}).click()])
+    await chooser.setFiles('test/fixtures/assistant-menu.json')
+    await head.getByText(/2 categories, 4 items, 2 choice groups/).waitFor()
+    await head.getByRole('button', {name: 'Load menu'}).click()
+    await head.locator('.edit-list li', {hasText: 'Onion Rings'}).waitFor({state: 'attached'}).catch(() => {})
+    await head.locator('.edit-list li', {hasText: 'Burgers'}).waitFor()
+    await head.getByText('Unpublished changes').waitFor()
+  })
+
   console.log('\nAll steps passed.')
 } catch (err) {
   console.log('FAILED\n', err.message)

@@ -2,7 +2,7 @@
 
 **Live app: https://amelia-mowers.github.io/yes-chef/**
 
-A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec, and [docs/sheffield-research.md](docs/sheffield-research.md) for the research behind Sheffield, the optional on-device menu assistant (sources in [docs/research-notes/](docs/research-notes/)).
+A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec.
 
 ## Run it
 
@@ -41,6 +41,16 @@ Moving domains does not move data (IndexedDB is per origin): export everything f
 ## How sync works
 
 The head owns the log and assigns every `seq`. A kitchen sends an *intent* (with an ID) → the head stamps it as an event, saves it, and broadcasts it to all kitchens. Kitchens resend queued intents every 3 s until the matching event arrives; the head ignores duplicates. On (re)connect a kitchen sends `hello {lastSeq, epoch}` and gets everything after `lastSeq`, or the full log if the head's log was cleared or replaced (new `epoch`).
+
+## Sheffield, the menu butler
+
+Menu → **Sheffield** opens a guide for building the menu with any chat assistant (ChatGPT, Claude, Gemini…):
+
+1. **Copy** or **Download** Sheffield's instructions. They ask the assistant to play Sheffield, a polite little butler, to ask clarifying questions, and to return a `menu.json` in Yes Chef's format. Optionally they include the current menu as JSON so the assistant edits it instead of starting fresh.
+2. Paste them into the assistant with photos, PDFs or spreadsheets of the menu, and answer Sheffield's questions.
+3. **Import menu.json**. `normalizeMenu` (`js/sheffield/instructions.js`) repairs common assistant mistakes (missing ids or colours, choice groups referenced by name, unknown references, plain-string items) and lists what it fixed before loading the result into the designer as a draft. Nothing is published until you publish.
+
+An on-device version (a local Qwen3.5 model reading photos in the browser) was prototyped and parked on the `sheffield-on-device` branch; [docs/sheffield-research.md](docs/sheffield-research.md) has the research behind it, with sources in [docs/research-notes/](docs/research-notes/).
 
 ## Not built yet
 

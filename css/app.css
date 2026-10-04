@@ -408,3 +408,20 @@ main.empty { margin: auto; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition: none !important; }
 }
+
+/* ---------- Sheffield ---------- */
+
+.sf-launch img { width: 28px; height: 28px; margin-left: -6px; }
+.sf { display: flex; flex-direction: column; gap: 14px; }
+.sf-intro { display: flex; gap: 14px; align-items: flex-end; }
+.sf-avatar { width: 72px; height: 72px; flex: none; }
+.sf-bubble { padding: 12px 16px; border-radius: 18px 18px 18px 4px; background: var(--surface); border: 1px solid var(--line); line-height: 1.45; }
+.sf-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.sf-actions .btn { flex: 1 1 200px; }
+.sf-preview summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.sf-preview pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; max-height: 40vh; overflow: auto; }
+@media (max-width: 600px) { .sf-avatar { width: 52px; height: 52px; } }
+.sf-preview summary { list-style: none; gap: 8px; }
+.sf-preview summary::-webkit-details-marker { display: none; }
+.sf-preview summary::before { content: "▸"; transition: transform .15s; }
+.sf-preview[open] summary::before { transform: rotate(90deg); }

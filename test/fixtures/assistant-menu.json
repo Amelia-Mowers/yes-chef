@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "categories": [
+    { "id": "cat_burgers", "name": "Burgers", "color": "#E07A5F",
+      "items": [
+        { "id": "itm_classic", "name": "Classic Burger", "modifierGroups": ["mg_temp", "Extras"] },
+        { "name": "Mushroom Swiss Burger", "modifierGroups": ["mg_temp", "mg_missing"] }
+      ] },
+    { "id": "cat_sides", "name": "Sides",
+      "items": [ { "id": "itm_fries", "name": "Fries", "modifierGroups": [] }, "Onion Rings" ] }
+  ],
+  "modifierGroups": [
+    { "id": "mg_temp", "name": "Temperature", "select": "single", "required": true,
+      "options": [{ "id": "opt_mr", "name": "Medium rare" }, { "id": "opt_wd", "name": "Well done" }] },
+    { "id": "mg_extras", "name": "Extras", "select": "multi", "required": false,
+      "options": ["Add avocado", { "id": "opt_egg", "name": "Add fried egg" }] }
+  ]
+}

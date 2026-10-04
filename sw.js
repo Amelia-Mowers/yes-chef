@@ -1,5 +1,5 @@
 // Offline app shell. Bump VERSION whenever any shell file changes.
-const VERSION = 'yes-chef-v2'
+const VERSION = 'yes-chef-v3'
 const SHELL = [
   './',
   'index.html',
@@ -20,6 +20,9 @@ const SHELL = [
   'js/views/menu.js',
   'js/views/settings.js',
   'js/views/pair.js',
+  'js/views/sheffield.js',
+  'js/sheffield/instructions.js',
+  'icons/sheffield.svg',
   'vendor/trystero.js',
   'vendor/qr.js',
   'icons/icon.svg',
