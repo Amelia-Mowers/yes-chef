@@ -6,6 +6,7 @@ import {shortCode, pairingUrl} from '../net.js'
 import {DEFAULT_SETTINGS} from '../log.js'
 import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
+import {THEMES, getTheme, setTheme} from '../theme.js'
 
 function qrSvg(text) {
   const qr = qrcode(0, 'M')
@@ -22,9 +23,19 @@ function toggle(label, on, onchange, hint) {
   )
 }
 
-function wakeLockSection() {
+function screenSection() {
+  const seg = h('div', {class: 'seg'})
+  const renderSeg = () =>
+    clear(seg, THEMES.map(([value, label]) =>
+      h('button', {class: 'seg-btn' + (getTheme() === value ? ' on' : ''), 'aria-pressed': String(getTheme() === value), onclick: () => {
+        setTheme(value)
+        renderSeg()
+      }}, label)
+    ))
+  renderSeg()
   return h('section', {class: 'panel'},
     h('h2', null, 'Screen'),
+    h('div', {class: 'field'}, h('span', null, 'Appearance'), seg),
     toggle('Keep screen awake', wakeLockOn(), async v => {
       await setLocal({wakeLock: v})
       applyWakeLock()
@@ -107,7 +118,7 @@ export function settingsView() {
           }}, 'Clear history')
         )
       ),
-      wakeLockSection(),
+      screenSection(),
       roleSection()
     )
   }
@@ -132,7 +143,7 @@ export function settingsView() {
           if (await confirmDialog({title: 'Unpair this kitchen?', message: 'Tickets are removed from this tablet until you pair again.', confirm: 'Unpair', danger: true})) unpairKitchen()
         }}, 'Unpair')
       ),
-      wakeLockSection(),
+      screenSection(),
       roleSection()
     )
   }

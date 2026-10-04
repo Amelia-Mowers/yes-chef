@@ -4,6 +4,7 @@ import {h, clear, toast} from './ui.js'
 import {state, boot, subscribe, chooseRole, pairKitchen, setHooks} from './store.js'
 import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
+import {applyTheme} from './theme.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
 import {historyView} from './views/history.js'
@@ -118,6 +119,7 @@ function readPairingHash() {
 }
 
 async function start() {
+  applyTheme()
   setHooks({toast: msg => toast(msg)})
   subscribe(render)
   await boot()

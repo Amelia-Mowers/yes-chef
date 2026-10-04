@@ -1,5 +1,5 @@
 // Offline app shell. Bump VERSION whenever any shell file changes.
-const VERSION = 'yes-chef-v1'
+const VERSION = 'yes-chef-v2'
 const SHELL = [
   './',
   'index.html',
@@ -12,6 +12,7 @@ const SHELL = [
   'js/net.js',
   'js/ui.js',
   'js/wake.js',
+  'js/theme.js',
   'js/sample-menu.js',
   'js/views/order.js',
   'js/views/kitchen.js',
