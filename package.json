@@ -1,0 +1,20 @@
+{
+  "name": "yes-chef",
+  "version": "0.1.0",
+  "description": "Backend-free PWA that routes orders from a front-of-house tablet to kitchen tablets",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "vendor": "esbuild vendor-src/trystero.js --bundle --format=esm --minify --outfile=vendor/trystero.js && esbuild vendor-src/qr.js --bundle --format=esm --minify --outfile=vendor/qr.js",
+    "icons": "node tools/make-icons.mjs",
+    "serve": "node tools/serve.mjs"
+  },
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "jsqr": "^1.4.0",
+    "playwright": "^1.63.0",
+    "qrcode-generator": "^2.0.4",
+    "trystero": "^0.26.0"
+  },
+  "private": true
+}
