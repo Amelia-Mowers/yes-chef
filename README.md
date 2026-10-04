@@ -1,6 +1,8 @@
 # Yes Chef
 
-A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. The spec is in the [Yes Chef — Spec](https://claude.ai/artifact/W79Dm4p7E8YvKpp5AbfZDq) doc.
+**Live app: https://amelia-mowers.github.io/yes-chef/**
+
+A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec.
 
 ## Run it
 
