@@ -4,12 +4,13 @@
   "description": "Backend-free PWA that routes orders from a front-of-house tablet to kitchen tablets",
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "vendor": "esbuild vendor-src/trystero.js --bundle --format=esm --minify --outfile=vendor/trystero.js && esbuild vendor-src/qr.js --bundle --format=esm --minify --outfile=vendor/qr.js",
+    "vendor": "esbuild vendor-src/trystero.js --bundle --format=esm --minify --outfile=vendor/trystero.js && esbuild vendor-src/qr.js --bundle --format=esm --minify --outfile=vendor/qr.js && esbuild vendor-src/transformers.js --bundle --format=esm --minify --platform=browser --outfile=vendor/transformers.js",
     "icons": "node tools/make-icons.mjs",
     "serve": "node tools/serve.mjs"
   },
   "type": "module",
   "devDependencies": {
+    "@huggingface/transformers": "^4.3.0",
     "esbuild": "^0.28.2",
     "jsqr": "^1.4.0",
     "playwright": "^1.63.0",

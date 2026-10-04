@@ -7,6 +7,9 @@ import {DEFAULT_SETTINGS} from '../log.js'
 import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
 import {THEMES, getTheme, setTheme} from '../theme.js'
+import {agent, initAgent} from '../sheffield/agent.js'
+import {MODELS} from '../sheffield/models.js'
+import {dismissSheffield} from './sheffield.js'
 
 function qrSvg(text) {
   const qr = qrcode(0, 'M')
@@ -41,6 +44,31 @@ function screenSection() {
       applyWakeLock()
     }, 'Stops the tablet sleeping and dropping the connection.')
   )
+}
+
+function sheffieldSection(render) {
+  const box = h('section', {class: 'panel'}, h('h2', null, 'Sheffield'))
+  const fill = () => {
+    const tier = agent.tier && MODELS[agent.tier]
+    box.replaceChildren(
+      h('h2', null, h('img', {class: 'sf-avatar inline', src: 'icons/sheffield.svg', alt: ''}), ' Sheffield'),
+      tier
+        ? [
+            h('p', null, `${tier.label} is hired on this tablet.`),
+            agent.device && h('p', {class: 'muted small'}, `Running on ${agent.device === 'webgpu' ? 'the GPU' : 'the CPU (slow)'}${agent.precision ? `, ${agent.precision}` : ''}.`),
+            h('p', {class: 'muted small'}, 'Qwen3.5, Apache-2.0 licence. ', h('a', {href: tier.licenseUrl, target: '_blank', rel: 'noopener'}, 'Licence text')),
+            h('button', {class: 'btn danger', onclick: async () => {
+              if (!(await confirmDialog({title: 'Dismiss Sheffield?', message: 'The model is deleted from this tablet. Menus and orders are not touched. You can hire Sheffield again later.', confirm: 'Dismiss', danger: true}))) return
+              await dismissSheffield()
+              render()
+            }}, 'Dismiss Sheffield')
+          ]
+        : h('p', {class: 'muted'}, 'Not hired. Open Menu → Ask Sheffield to hire the on-device menu butler, or use “Copy assistant instructions” with any chat assistant.')
+    )
+  }
+  if (agent.status === 'unknown') initAgent().then(fill)
+  fill()
+  return box
 }
 
 function roleSection() {
@@ -118,6 +146,7 @@ export function settingsView() {
           }}, 'Clear history')
         )
       ),
+      sheffieldSection(render),
       screenSection(),
       roleSection()
     )

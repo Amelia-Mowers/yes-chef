@@ -408,3 +408,59 @@ main.empty { margin: auto; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition: none !important; }
 }
+
+/* ---------- Sheffield ---------- */
+
+.sf-launch img { width: 28px; height: 28px; margin-left: -6px; }
+.sf-avatar { width: 36px; height: 36px; flex: none; border-radius: 50%; }
+.sf-avatar.big { width: 52px; height: 52px; }
+.sf-avatar.inline { width: 30px; height: 30px; vertical-align: middle; }
+.sf-avatar.thinking { animation: bob 1.2s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-3px) rotate(-4deg); } }
+.sheet.wide:has(.sf) { width: min(1180px, 100%); height: min(92vh, 900px); display: flex; flex-direction: column; }
+.sf { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.sf-head { flex-wrap: wrap; }
+.sf-head h2 { margin: 0; }
+.sf-grid { display: grid; grid-template-columns: 1fr minmax(260px, 340px); gap: 16px; min-height: 0; flex: 1; }
+.sf-chat { display: flex; flex-direction: column; min-height: 0; gap: 10px; }
+.sf-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px; min-height: 160px; }
+.sf-msg { display: flex; gap: 10px; align-items: flex-end; max-width: 92%; }
+.sf-msg.user { align-self: flex-end; flex-direction: column; align-items: flex-end; }
+.sf-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sf-bubble { padding: 10px 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
+.sf-msg.sheffield .sf-bubble { border-bottom-left-radius: 4px; }
+.sf-msg.user .sf-bubble { background: var(--accent); color: var(--accent-text); border-color: var(--accent); border-bottom-right-radius: 4px; }
+.sf-bubble pre { margin: 6px 0 0; white-space: pre-wrap; font: inherit; font-size: .92rem; color: var(--muted); max-height: 240px; overflow: auto; }
+.sf-bubble summary { cursor: pointer; font-weight: 600; }
+.sf-typing .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+.sf-thumb { max-width: 180px; max-height: 180px; border-radius: 12px; border: 1px solid var(--line); }
+.sf-choices .chip { min-height: 48px; font-size: 1rem; }
+.sf-problems { color: var(--warn); font-size: .9rem; }
+.sf-stats { font-size: .8rem; }
+.sf-composer { display: flex; flex-direction: column; gap: 8px; }
+.sf-composer .row { align-items: flex-end; }
+.sf-input { resize: none; min-height: 48px; padding: 12px 14px; line-height: 1.35; flex: 1; }
+.sf-files { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip.small { min-height: 36px; padding: 0 4px 0 12px; font-size: .9rem; display: inline-flex; align-items: center; gap: 2px; }
+.sf-preview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; overflow-y: auto; min-height: 0; }
+.sf-preview-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; position: sticky; top: -14px; background: var(--surface); padding: 6px 0; }
+.sf-preview-head h3 { margin: 0; }
+.sf-cat { border-left: 6px solid var(--cat); padding-left: 10px; margin: 10px 0; }
+.sf-cat h4, .sf-groups h4 { margin: 0 0 4px; }
+.sf-cat ul, .sf-groups ul { margin: 0; padding-left: 18px; }
+.sf-cat li, .sf-groups li { margin: 2px 0; }
+.sf-hire { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.sf-hire p { margin: 0; }
+.sf-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.sf-tier { text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; min-height: var(--tap); }
+.sf-tier:hover, .sf-tier:focus-visible { border-color: var(--accent); }
+.progress { height: 12px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.progress-bar { height: 100%; background: var(--accent); transition: width .3s; }
+@media (max-width: 760px) {
+  .sheet.wide:has(.sf) { height: 94vh; }
+  .sf-grid { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .sf-preview { max-height: 30vh; }
+  .sf-head .btn.small { flex: 1; }
+}
+.sf-hire-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 12px; border-radius: 12px; border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); background: transparent; cursor: pointer; font-weight: 600; color: var(--muted); }

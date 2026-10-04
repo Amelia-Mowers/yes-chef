@@ -3,6 +3,7 @@
 import {h, clear, sheet, sheetHeader, confirmDialog, toast, downloadJson, pickJson, stamp, dayLabel, clock} from '../ui.js'
 import {state, saveDraft, publishMenu, importMenuToDraft, importAll, listBackups, restoreBackup, exportAll, hasData, emptyMenu} from '../store.js'
 import {SAMPLE_MENU} from '../sample-menu.js'
+import {openSheffield, copyInstructions} from './sheffield.js'
 
 const COLORS = ['#E07A5F', '#F2CC8F', '#81B29A', '#3D85C6', '#9C89B8', '#F28482', '#84A59D', '#E9C46A', '#6D6875', '#2A9D8F']
 const id = p => `${p}_${crypto.randomUUID().slice(0, 8)}`
@@ -42,6 +43,11 @@ export function menuView() {
           h('strong', null, state.menu ? `Live: v${state.menu.version}` : 'Not published yet'),
           dirty ? h('span', {class: 'pill s-started'}, 'Unpublished changes') : state.menu && h('span', {class: 'pill s-done'}, 'Up to date')
         ),
+        h('button', {class: 'btn sf-launch', onclick: () => openSheffield({onApplied: () => {
+          selectedCat = null
+          render()
+        }})}, h('img', {src: 'icons/sheffield.svg', alt: ''}), 'Ask Sheffield'),
+        h('button', {class: 'btn', onclick: copyInstructions, title: 'Copy a prompt for ChatGPT, Claude or any assistant; import the menu.json it returns'}, 'Copy assistant instructions'),
         h('button', {class: 'btn', onclick: loadTestMenu}, 'Load test menu'),
         h('button', {class: 'btn', onclick: () => downloadJson(state.menu || d, `yes-chef-menu-${stamp()}.json`)}, 'Export'),
         h('button', {class: 'btn', onclick: doImport}, 'Import'),

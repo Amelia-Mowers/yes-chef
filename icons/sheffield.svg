@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <title>Sheffield</title>
+  <circle cx="60" cy="60" r="58" fill="#F2CC8F"/>
+  <!-- tailcoat and shirt -->
+  <path d="M18 112c4-22 20-32 42-32s38 10 42 32a58 58 0 0 1-84 0z" fill="#2B2D42"/>
+  <path d="M46 82l14 22 14-22c-4-1.5-9-2-14-2s-10 .5-14 2z" fill="#fff"/>
+  <!-- bow tie -->
+  <path d="M60 88l-11-6v12zM60 88l11-6v12z" fill="#D0603F"/>
+  <circle cx="60" cy="88" r="3" fill="#B04A2C"/>
+  <!-- head -->
+  <ellipse cx="60" cy="50" rx="26" ry="27" fill="#FBE3CF"/>
+  <ellipse cx="34" cy="52" rx="4" ry="6" fill="#F5CDB0"/>
+  <ellipse cx="86" cy="52" rx="4" ry="6" fill="#F5CDB0"/>
+  <!-- neatly parted hair -->
+  <path d="M34 44c0-17 12-25 26-25s26 8 26 25c-6-7-15-11-24-11 3 2 4 4 4 6-9-3-22-2-32 5z" fill="#3B2F2F"/>
+  <!-- eyes, monocle, cheeks -->
+  <circle cx="50" cy="51" r="3" fill="#2B2D42"/>
+  <circle cx="70" cy="51" r="3" fill="#2B2D42"/>
+  <circle cx="70" cy="51" r="7.5" fill="none" stroke="#C9A227" stroke-width="2"/>
+  <path d="M77 54q4 10 1 22" fill="none" stroke="#C9A227" stroke-width="1.2"/>
+  <circle cx="44" cy="61" r="4" fill="#F28482" opacity=".45"/>
+  <circle cx="76" cy="61" r="4" fill="#F28482" opacity=".45"/>
+  <!-- curled moustache and smile -->
+  <path d="M60 62c-4-3-10-3-13 0-2 2-5 2-6 0 1 5 7 6 11 4 3-1 6-2 8-1 2-1 5 0 8 1 4 2 10 1 11-4-1 2-4 2-6 0-3-3-9-3-13 0z" fill="#3B2F2F"/>
+  <path d="M54 69q6 4 12 0" fill="none" stroke="#B5655A" stroke-width="2" stroke-linecap="round"/>
+</svg>
