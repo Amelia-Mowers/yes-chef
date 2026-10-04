@@ -22,7 +22,7 @@ Camera access for the QR scanner and service workers need HTTPS (or `localhost`)
 
 ## Deploy
 
-Push the repo to GitHub and enable Pages for the branch root. Every path is relative, so the same files work from `/yes-chef/` and later from a root domain on Cloudflare Pages. Bump `VERSION` in `sw.js` when you ship changes so tablets pick them up.
+Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass, the app files (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`) are published to GitHub Pages. Pull requests run the tests without deploying. Every path is relative, so the same files work from `/yes-chef/` and later from a root domain on Cloudflare Pages. Bump `VERSION` in `sw.js` when you ship changes so tablets pick them up.
 
 Moving domains does not move data (IndexedDB is per origin): export everything from Settings on the old domain and import it on the new one.
 
