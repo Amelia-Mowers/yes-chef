@@ -2,7 +2,7 @@
 
 **Live app: https://amelia-mowers.github.io/yes-chef/**
 
-A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec.
+A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec, and [docs/sheffield-research.md](docs/sheffield-research.md) for the research behind Sheffield, the optional on-device menu assistant (sources in [docs/research-notes/](docs/research-notes/)).
 
 ## Run it
 
