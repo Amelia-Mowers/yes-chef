@@ -2,7 +2,7 @@
 
 **Live app: https://app.yes-chef.win/** · Website: https://yes-chef.win/
 
-A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec.
+A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan towards a paid Android app.
 
 ## Run it
 
