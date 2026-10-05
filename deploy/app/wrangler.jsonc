@@ -1,0 +1,11 @@
+// app.yes-chef.win: the Yes Chef app as a static-assets Worker.
+// Deploy: tools/assemble.sh _site && npx wrangler deploy --config deploy/app/wrangler.jsonc
+{
+  "name": "yes-chef-app",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "../../_site"
+  },
+  "routes": [{"pattern": "app.yes-chef.win", "custom_domain": true}],
+  "workers_dev": false
+}

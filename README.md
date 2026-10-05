@@ -24,11 +24,12 @@ Camera access for the QR scanner and service workers need HTTPS (or `localhost`)
 
 Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass:
 
-- **app.yes-chef.win**: `tools/assemble.sh` builds the app (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`, `_headers`) and it's deployed to the Cloudflare Pages project `yes-chef-app`.
-- **yes-chef.win**: the marketing page in `site/` goes to the Cloudflare Pages project `yes-chef-site`. `tools/screenshots.mjs` regenerates its screenshots from the real app.
+- **app.yes-chef.win**: `tools/assemble.sh` builds the app (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`, `_headers`) into `_site/`, deployed as the static-assets Worker `yes-chef-app` (`deploy/app/wrangler.jsonc`).
+- **yes-chef.win**: the marketing page in `site/` is the static-assets Worker `yes-chef-site` (`deploy/site/wrangler.jsonc`). `tools/screenshots.mjs` regenerates its screenshots from the real app.
+- Both configs declare their custom domain, so Cloudflare manages the DNS records. To deploy by hand: `npx wrangler login`, then `tools/assemble.sh _site && npx wrangler deploy --config deploy/app/wrangler.jsonc` and `npx wrangler deploy --config deploy/site/wrangler.jsonc`.
 - **amelia-mowers.github.io/yes-chef** (old address): still deployed so installed tablets see a "Yes Chef has moved" banner (`js/moved.js`), which appears only once the new address responds. Remove this job when nobody uses the old address.
 
-The Cloudflare job needs the repository secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit) and `CLOUDFLARE_ACCOUNT_ID`; without them it skips. Pull requests run the tests without deploying.
+The Cloudflare job needs the repository secrets `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (made from the “Edit Cloudflare Workers” token template, limited to this account and the yes-chef.win zone); without them it skips. Pull requests run the tests without deploying.
 
 `tools/assemble.sh` stamps each build with its commit id (`VERSION` in `sw.js`, `BUILD` in `js/version.js`), so every deploy installs on tablets as a new version: the app checks when it returns to the foreground and every 30 minutes, then shows a **Reload** banner (Settings → App version also has **Check for updates**). It never reloads by itself; an unsent ticket on the head survives a reload. Paths are relative, so the app works from any address.
 

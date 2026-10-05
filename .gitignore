@@ -1,2 +1,10 @@
 node_modules/
 test/shots/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+_site/

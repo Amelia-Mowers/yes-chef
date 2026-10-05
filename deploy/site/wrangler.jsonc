@@ -1,0 +1,11 @@
+// yes-chef.win: the marketing site as a static-assets Worker.
+// Deploy: npx wrangler deploy --config deploy/site/wrangler.jsonc
+{
+  "name": "yes-chef-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "../../site"
+  },
+  "routes": [{"pattern": "yes-chef.win", "custom_domain": true}],
+  "workers_dev": false
+}
