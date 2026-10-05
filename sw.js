@@ -14,6 +14,7 @@ const SHELL = [
   'js/ui.js',
   'js/wake.js',
   'js/update.js',
+  'js/moved.js',
   'js/version.js',
   'js/theme.js',
   'js/sample-menu.js',

@@ -6,6 +6,7 @@ import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
 import {registerServiceWorker} from './update.js'
+import {announceMove} from './moved.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
 import {historyView} from './views/history.js'
@@ -134,6 +135,7 @@ async function start() {
     }
   }
   render()
+  announceMove()
 }
 
 registerServiceWorker()

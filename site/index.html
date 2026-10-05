@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yes Chef · Tablet orders from the front to the kitchen</title>
+  <meta name="description" content="Yes Chef turns your tablets into a simple kitchen order system. One tablet takes orders; every kitchen screen gets the ticket instantly over your own Wi-Fi.">
+  <meta name="theme-color" content="#f6f2ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#17140f" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Yes Chef">
+  <meta property="og:description" content="Send orders from the front to the kitchen in a tap. Tablets talk over your own Wi-Fi.">
+  <meta property="og:image" content="https://yes-chef.win/img/order.png">
+  <meta property="og:url" content="https://yes-chef.win/">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --bg: #f6f2ec; --surface: #fff; --surface-2: #efe9e1; --line: #ddd4c8;
+      --text: #221d17; --muted: #6f6458; --accent: #d0603f; --accent-text: #fff;
+      --ok: #2e7d4f; --shadow: 0 1px 2px rgb(0 0 0 / .06), 0 12px 40px rgb(60 40 20 / .12);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #17140f; --surface: #221e18; --surface-2: #2d2820; --line: #3d362c;
+        --text: #f3ede4; --muted: #a99d8e; --accent: #e9805f; --accent-text: #1b120d;
+        --ok: #6cc28f; --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 12px 40px rgb(0 0 0 / .45);
+        color-scheme: dark;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; height: auto; }
+    .wrap { width: min(1120px, 100% - 32px); margin: 0 auto; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 14px; font-weight: 700; text-decoration: none; border: 1px solid var(--line); background: var(--surface); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+    .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    header.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+    header.top .wrap { display: flex; align-items: center; gap: 16px; min-height: 68px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; text-decoration: none; }
+    .brand img { width: 36px; height: 36px; }
+    header.top nav { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    header.top nav a:not(.btn) { text-decoration: none; color: var(--muted); font-weight: 600; }
+    header.top .btn { min-height: 44px; padding: 0 18px; }
+
+    .hero { padding: 72px 0 40px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 48px; align-items: center; }
+    .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 700; font-size: .85rem; letter-spacing: .02em; }
+    h1 { font-size: clamp(2.3rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -.02em; margin: 16px 0 18px; }
+    .lead { font-size: 1.2rem; color: var(--muted); margin: 0 0 28px; max-width: 34ch; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .shot { border-radius: 18px; border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface); }
+    .hero-art { position: relative; }
+    .hero-art .phone { position: absolute; width: 30%; right: -4%; bottom: -10%; border-radius: 22px; border: 6px solid #1d1a16; }
+
+    section { padding: 64px 0; }
+    h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -.01em; margin: 0 0 12px; }
+    .sub { color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+    .feature .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); margin-bottom: 12px; }
+    .feature .ico svg { width: 24px; height: 24px; }
+    .feature h3 { margin: 0 0 6px; font-size: 1.1rem; }
+    .feature p { margin: 0; color: var(--muted); font-size: 1rem; }
+
+    .steps { counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; list-style: none; padding: 0; margin: 0; }
+    .steps li { counter-increment: step; position: relative; padding: 22px 22px 22px 76px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+    .steps li::before { content: counter(step); position: absolute; left: 22px; top: 20px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); font-weight: 800; }
+    .steps strong { display: block; margin-bottom: 4px; }
+    .steps span { color: var(--muted); font-size: 1rem; }
+
+    .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .gallery figure { margin: 0; }
+    .gallery figcaption { color: var(--muted); font-size: .95rem; margin-top: 10px; }
+
+    .sheffield { display: grid; grid-template-columns: 140px 1fr; gap: 28px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 28px; }
+    .sheffield img { width: 140px; }
+    .sheffield h2 { margin-bottom: 8px; }
+    .sheffield p { margin: 0; color: var(--muted); }
+
+    .final { text-align: center; padding: 72px 0 88px; }
+    .final .cta { justify-content: center; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0; color: var(--muted); font-size: .95rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding-top: 40px; }
+      .hero-art .phone { display: none; }
+      .features, .steps { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 620px) {
+      body { font-size: 17px; }
+      header.top nav a:not(.btn) { display: none; }
+      .features, .steps, .gallery { grid-template-columns: 1fr; }
+      .sheffield { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+      .sheffield img { width: 110px; }
+      section { padding: 44px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="icon.svg" alt="">Yes Chef</a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a class="btn primary" href="https://app.yes-chef.win/">Open the app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <div>
+        <span class="pill">Early access</span>
+        <h1>Orders from the front to the kitchen, in a tap.</h1>
+        <p class="lead">Yes Chef turns your tablets into a simple kitchen order system. One tablet takes orders; every kitchen screen gets the ticket instantly over your own Wi-Fi.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://app.yes-chef.win/">Open the app</a>
+          <a class="btn" href="#how">How it works</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <img class="shot" src="img/order.png" width="2360" height="1640" alt="The Yes Chef order screen: category buttons on the left, a ticket for Table 7 with a Chicken Sandwich and Onion Rings grouped on Plate 1, and a big Send button.">
+        <img class="shot phone" src="img/phone-item.png" width="1170" height="2532" alt="Yes Chef on a phone, choosing Medium rare and Add bacon for a Classic Burger.">
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>Built for a busy pass</h2>
+        <p class="sub">Big buttons, three screens, and nothing to set up beyond the tablets you already have.</p>
+        <div class="features">
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7"/></svg></div>
+            <h3>Glove-friendly buttons</h3>
+            <p>Kitchen tickets have big Started and Done buttons, with age timers that turn amber, then red.</p>
+          </article>
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/></svg></div>
+            <h3>Runs on your Wi-Fi</h3>
+            <p>Tablets talk to each other directly, encrypted. There's no Yes Chef server holding your orders.</p>
+          </article>
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></div>
+            <h3>Undo anything</h3>
+            <p>Pull back an order seconds after sending, recall a ticket marked done, and see every change in History.</p>
+          </article>
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg></div>
+            <h3>Plates and choices</h3>
+            <p>Cooking temperatures, sizes and add-ons on every dish, and plates that group what goes out together.</p>
+          </article>
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+            <h3>Installs like an app</h3>
+            <p>Add it to the home screen. It opens without internet once installed; pairing tablets needs a connection.</p>
+          </article>
+          <article class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 0 12 6 6 0 0 0 0-12z"/><path d="M12 15v6M8 21h8"/></svg></div>
+            <h3>Light and dark</h3>
+            <p>A dark kitchen theme that's easy on the eyes, a bright one for the counter, or follow the device.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2>Up and running in minutes</h2>
+        <p class="sub">Works in Chrome on Android tablets and Safari on iPad.</p>
+        <ol class="steps">
+          <li><strong>Set up the front tablet</strong><span>Open Yes Chef, choose Head, and build your menu or load the sample one.</span></li>
+          <li><strong>Pair the kitchen</strong><span>On each kitchen tablet choose Kitchen and scan the QR code from the front tablet.</span></li>
+          <li><strong>Take orders</strong><span>Tap dishes, choose options, hit Send. The kitchen sees it straight away.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap gallery">
+        <figure>
+          <img class="shot" src="img/kitchen-dark.png" width="2360" height="1640" loading="lazy" alt="Kitchen screen in dark mode with two open tickets; Table 4 shows Lemonade, then Plate 1 with a Classic Burger and Fries, then Plate 2 with a Veggie Burger.">
+          <figcaption>The kitchen screen, oldest ticket first, grouped by plate.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="img/history.png" width="2360" height="1640" loading="lazy" alt="History screen listing today's orders with their status.">
+          <figcaption>Every order and change, filterable by status, time or name.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap sheffield">
+        <img src="sheffield.svg" alt="Sheffield, a little butler with a monocle and bow tie">
+        <div>
+          <h2>Meet Sheffield, your menu butler</h2>
+          <p>Photograph your menu or chalkboard and hand it to Sheffield through ChatGPT, Claude or any assistant you already use. Sheffield asks a few questions and returns a menu file Yes Chef imports in one tap.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="wrap">
+        <h2>Try it on your tablets</h2>
+        <p class="sub" style="margin-inline:auto">Yes Chef is in early access. Open it on the front tablet to get started.</p>
+        <div class="cta"><a class="btn primary" href="https://app.yes-chef.win/">Open the app</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 Yes Chef</span>
+      <a href="https://app.yes-chef.win/">app.yes-chef.win</a>
+    </div>
+  </footer>
+</body>
+</html>

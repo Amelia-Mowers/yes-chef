@@ -1,6 +1,6 @@
 # Yes Chef
 
-**Live app: https://amelia-mowers.github.io/yes-chef/**
+**Live app: https://app.yes-chef.win/** · Website: https://yes-chef.win/
 
 A backend-free PWA that routes orders from one front-of-house tablet (the **head**) to one or more **kitchen** tablets on the same Wi-Fi. See [SPEC.md](SPEC.md) for the full spec.
 
@@ -22,25 +22,17 @@ Camera access for the QR scanner and service workers need HTTPS (or `localhost`)
 
 ## Deploy
 
-Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass, the app files (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`) are published to GitHub Pages. Pull requests run the tests without deploying. The workflow stamps each deploy with its commit id (`VERSION` in `sw.js`, `BUILD` in `js/version.js`), so every deploy installs on tablets as a new version: the app checks when it returns to the foreground and every 30 minutes, then shows a **Reload** banner (Settings → App version also has **Check for updates**). It never reloads by itself; an unsent ticket on the head survives a reload. Every path is relative, so the same files work from `/yes-chef/` and later from a root domain on Cloudflare Pages.
+Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass:
 
-Moving domains does not move data (IndexedDB is per origin): export everything from Settings on the old domain and import it on the new one.
+- **app.yes-chef.win**: `tools/assemble.sh` builds the app (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`, `_headers`) and it's deployed to the Cloudflare Pages project `yes-chef-app`.
+- **yes-chef.win**: the marketing page in `site/` goes to the Cloudflare Pages project `yes-chef-site`. `tools/screenshots.mjs` regenerates its screenshots from the real app.
+- **amelia-mowers.github.io/yes-chef** (old address): still deployed so installed tablets see a "Yes Chef has moved" banner (`js/moved.js`), which appears only once the new address responds. Remove this job when nobody uses the old address.
 
-## Layout
+The Cloudflare job needs the repository secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit) and `CLOUDFLARE_ACCOUNT_ID`; without them it skips. Pull requests run the tests without deploying.
 
-| Path | What it does |
-| --- | --- |
-| `js/log.js` | Pure event-log logic: undo/redo resolution, replay into orders, order numbers, recall |
-| `js/store.js` | State for both roles; head appends events, kitchens mirror the log and send intents |
-| `js/net.js` | Trystero (Nostr signaling, WebRTC data) plus AES-GCM with the pairing secret; pairing codes |
-| `js/db.js` | IndexedDB: key/value, events, backups |
-| `js/views/` | Order, Kitchen, History, Menu designer, Settings, Pairing |
-| `vendor/` | Pre-bundled Trystero, qrcode-generator and jsQR (`npm run vendor` rebuilds them) |
-| `sw.js` | Offline app shell |
+`tools/assemble.sh` stamps each build with its commit id (`VERSION` in `sw.js`, `BUILD` in `js/version.js`), so every deploy installs on tablets as a new version: the app checks when it returns to the foreground and every 30 minutes, then shows a **Reload** banner (Settings → App version also has **Check for updates**). It never reloads by itself; an unsent ticket on the head survives a reload. Paths are relative, so the app works from any address.
 
-## How sync works
-
-The head owns the log and assigns every `seq`. A kitchen sends an *intent* (with an ID) → the head stamps it as an event, saves it, and broadcasts it to all kitchens. Kitchens resend queued intents every 3 s until the matching event arrives; the head ignores duplicates. On (re)connect a kitchen sends `hello {lastSeq, epoch}` and gets everything after `lastSeq`, or the full log if the head's log was cleared or replaced (new `epoch`).
+Browser data (IndexedDB) belongs to one address, so moving address means Export everything on the old one and Import on the new.
 
 ## Plates
 
