@@ -11,7 +11,7 @@ Last updated 2026-10-05.
 | 1 | Order-taker role | **Done** |
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
 | 3 | Own signaling relay | **Done** |
-| 4 | Licensing and backup server | Not started |
+| 4 | Licensing and backup server | **Built and tested**; goes live when R2 is enabled |
 | 5 | Android app (TWA) | Not started |
 | 6 | Play Billing | Not started |
 | 7 | Play Store setup and closed test | Not started |
@@ -40,26 +40,31 @@ Already shipped along the way: plates, reload-on-update banner, Sheffield (menu 
 - [x] relay.yes-chef.win: Worker + one Durable Object per room (hibernating WebSockets) speaking Trystero's ws-relay protocol (`relay/`). Only Yes Chef origins may connect.
 - [x] Kitchens and order takers use it when reachable, else public Nostr relays; the head listens on both so every combination meets (older builds included).
 - [x] e2e runs the relay locally (`npm run relay`) and checks pairing went through it; CI deploys it.
-- [ ] Uptime monitoring (e.g. a health check on https://relay.yes-chef.win/health).
+- [ ] Uptime monitoring (health checks on https://relay.yes-chef.win/health and https://api.yes-chef.win/health).
 - [ ] Look into a curl handshake with an Origin header returning 500 (real browsers connect fine).
 
 ## 4. Licensing and backup server
 
 One Cloudflare Worker with D1 (database) and R2 (file storage).
 
+Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `yes-chef-backups`); tests in `test/api.test.mjs` and the e2e.
+
 **Licensing** (enforces one subscription per head; Play subscriptions belong to a Google account, not a device):
-- [ ] Endpoint: receive Play purchase token + head device id, verify with the Google Play Developer API, **acknowledge within 3 days** (or Google refunds automatically).
-- [ ] Bind subscription → one head device, with a "move to a new tablet" flow.
-- [ ] Return a signed license with an expiry; the app verifies offline with a public key built in.
-- [ ] Real-time Developer Notifications (Pub/Sub) for renewals, cancellations, refunds.
-- [ ] App: license cached with expiry + grace period (7–14 days offline). On lapse: reminder / read-only. **Never lock the kitchen out mid-service.**
-- [ ] Head tells kitchens/order takers it's licensed during sync; they never check themselves.
+- [x] `/v1/license/activate`: verify the Play purchase token (Play Developer API, subscriptionsv2), **acknowledge** it, bind the account to one head device; a second device gets `bound_elsewhere` unless it asks to move (`transfer`).
+- [x] Signed licenses (ECDSA P-256, 7 days), verified offline in the app (`js/license.js`, public key in `js/license-key.js`); refreshed daily; 7-day offline grace after expiry.
+- [x] Upgrades/resubscriptions (linked purchase tokens) stay on the same account.
+- [x] `/v1/play/rtdn`: Real-time Developer Notifications endpoint (shared-key protected).
+- [x] App Settings → Subscription shows active / grace / moved / ended.
+- [ ] Enforcement UI for lapsed heads (reminder, then read-only; **never lock the kitchen out mid-service**). Lands with billing (item 6); `ENFORCE` is off while the browser is free.
+- [ ] Head tells kitchens/order takers it's licensed during sync (only needed once enforcement is on).
 
 **Remote backups** (paid feature):
-- [ ] Encrypted at rest with server-managed keys (Cloudflare Secrets Store), not end-to-end, so a new head on the same account can restore after losing every device.
-- [ ] Automatic daily snapshot plus one before each publish/import (reuse the local backup points).
-- [ ] Restore flow on a new head.
-- [ ] **Never back up Sheffield conversations** (if Sheffield ever gets in-app chat again).
+- [x] Encrypted per account (AES-GCM, keys derived from the `BACKUP_MASTER_KEY` Worker secret), not end-to-end, so a new head on the same account can restore after losing every device. Newest 60 kept.
+- [x] Automatic daily backup plus one before each publish/import/history clear; Back up now; Restore from cloud.
+- [x] Only the bound head can read or write; a moved/old head is refused.
+- [x] **Never back up Sheffield conversations**: the server keeps only menu, settings and events, whatever the client sends.
+
+**To go live** (needs you): enable R2 in the Cloudflare dashboard. Then: create the bucket, set the secrets `LICENSE_PRIVATE_KEY` and `BACKUP_MASTER_KEY`, deploy, set the repo variable `DEPLOY_API=true`. Google secrets (`GOOGLE_SERVICE_ACCOUNT`, `RTDN_SECRET`) come with the Play Console setup.
 
 ## 5. Android app (Trusted Web Activity)
 
@@ -87,6 +92,11 @@ One Cloudflare Worker with D1 (database) and R2 (file storage).
 
 - [ ] Staged rollout, support email, refund policy, simple status page.
 - [ ] Update the marketing site with pricing ($19/month or $190/year, 30-day free trial) and a Play Store badge.
+
+## Decision before launch
+
+- The browser version is free during early access and **stops being free when the Android app launches** (decided 2026-10-05). Before launch, decide what a browser head becomes: subscribe via Stripe on the website, or a time-limited demo that points to the Android app. Licensing already has the `ENFORCE` switch for this.
+- Confirm the Android package name `win.yeschef.app` (permanent once published).
 
 ## Pricing (decided 2026-10-05)
 

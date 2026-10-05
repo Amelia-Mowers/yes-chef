@@ -1,6 +1,6 @@
 // Settings for both roles.
 
-import {h, clear, confirmDialog, promptDialog, toast, downloadJson, pickJson, stamp} from '../ui.js'
+import {h, clear, confirmDialog, promptDialog, toast, downloadJson, pickJson, stamp, sheet, sheetHeader} from '../ui.js'
 import {state, changeSettings, regenerateRoom, exportAll, importAll, clearHistory, setLocal, resetRole, unpairKitchen, renameKitchen} from '../store.js'
 import {shortCode, pairingUrl, via} from '../net.js'
 import {DEFAULT_SETTINGS} from '../log.js'
@@ -8,6 +8,8 @@ import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
 import {THEMES, getTheme, setTheme} from '../theme.js'
 import {BUILD} from '../version.js'
+import {license, licenseStatus, onLicense, GRACE_MS, ENFORCE} from '../license.js'
+import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup} from '../cloud.js'
 import {checkForUpdate} from '../update.js'
 
 function qrSvg(text) {
@@ -46,6 +48,75 @@ function screenSection() {
       await setLocal({wakeLock: v})
       applyWakeLock()
     }, 'Stops the tablet sleeping and dropping the connection.')
+  )
+}
+
+const when = ts => new Date(ts).toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'})
+
+function subscriptionSection() {
+  const box = h('section', {class: 'panel'})
+  const fill = async () => {
+    const st = licenseStatus()
+    const last = await lastCloudBackup()
+    const rows = []
+    if (st === 'none') {
+      rows.push(h('p', null, ENFORCE ? 'This tablet has no subscription yet.' : 'Yes Chef is free in the browser during early access. Subscriptions and cloud backup come with the Android app.'))
+    } else if (st === 'moved') {
+      rows.push(h('p', null, `Your subscription moved to ${license.movedTo || 'another tablet'}. This tablet is no longer the head for it.`))
+    } else if (st === 'lapsed') {
+      rows.push(h('p', null, 'Your subscription has ended.'))
+    } else {
+      rows.push(h('p', null, '● Subscription active. This tablet is the head.'))
+      if (st === 'grace') rows.push(h('p', {class: 'muted small'}, `Couldn’t reach Yes Chef recently. Everything keeps working offline until ${when(license.claims.exp + GRACE_MS)}.`))
+      rows.push(
+        h('h3', null, 'Cloud backup'),
+        h('p', {class: 'muted small'}, last ? `Last backup ${when(last)}. Backs up daily and before every publish or import.` : 'Backs up daily and before every publish or import.'),
+        h('div', {class: 'row gap wrap'},
+          h('button', {class: 'btn', onclick: async e => {
+            e.currentTarget.disabled = true
+            try {
+              await backupNow('manual')
+              toast('Backed up to the cloud')
+            } catch (err) {
+              toast(`Backup failed: ${err.message}`)
+            }
+            fill()
+          }}, 'Back up now'),
+          h('button', {class: 'btn', onclick: openCloudRestore}, 'Restore from cloud')
+        )
+      )
+    }
+    box.replaceChildren(h('h2', null, 'Subscription'), ...rows)
+  }
+  fill()
+  const off = onLicense(() => (box.isConnected ? fill() : off()))
+  return box
+}
+
+async function openCloudRestore() {
+  let list
+  try {
+    list = await listCloudBackups()
+  } catch (err) {
+    return toast(`Couldn’t load cloud backups: ${err.message}`)
+  }
+  sheet(close =>
+    h('div', null,
+      sheetHeader('Restore from cloud', close),
+      list.length === 0 && h('p', null, 'No cloud backups yet.'),
+      h('ul', {class: 'edit-list'}, list.map(b =>
+        h('li', null,
+          h('div', {class: 'edit-main static'}, h('strong', null, when(b.createdAt)), h('small', {class: 'muted'}, ` · ${b.reason} · from ${b.deviceName || 'head'}`)),
+          h('button', {class: 'btn small danger', onclick: async () => {
+            if (!(await confirmDialog({title: 'Restore this backup?', message: 'Menu, settings and history on this tablet are replaced (a local backup of now is taken first). Kitchens resync.', confirm: 'Restore', danger: true}))) return
+            await restoreCloudBackup(b.id)
+            toast('Restored from the cloud')
+            close()
+          }}, 'Restore')
+        )
+      ))
+    ),
+    {wide: true}
   )
 }
 
@@ -144,6 +215,7 @@ export function settingsView() {
           }}, 'Clear history')
         )
       ),
+      subscriptionSection(),
       screenSection(),
       aboutSection(),
       roleSection()

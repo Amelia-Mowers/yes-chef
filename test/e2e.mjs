@@ -1,8 +1,8 @@
 // End-to-end: one head and one kitchen in separate browser contexts.
 // Needs internet (Trystero signals through public Nostr relays). Run: node test/e2e.mjs
 import {chromium} from 'playwright'
-import {spawn} from 'node:child_process'
-import {mkdirSync, mkdtempSync, cpSync, readFileSync, writeFileSync} from 'node:fs'
+import {spawn, execFileSync} from 'node:child_process'
+import {mkdirSync, mkdtempSync, cpSync, readFileSync, writeFileSync, rmSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import assert from 'node:assert/strict'
@@ -12,12 +12,20 @@ mkdirSync(OUT, {recursive: true})
 const server = spawn('node', ['tools/serve.mjs'], {env: {...process.env, PORT: '8091'}, stdio: 'ignore'})
 // Our signaling relay, run locally (the app on localhost looks for it on :8788).
 const relay = spawn('npx', ['wrangler', 'dev', '--config', 'relay/wrangler.jsonc', '--env', 'dev', '--port', '8788'], {stdio: 'ignore', detached: true})
-for (let i = 0; ; i++) {
-  try {
-    if ((await fetch('http://localhost:8788/health')).ok) break
-  } catch {}
-  if (i > 120) throw new Error('relay did not start')
-  await new Promise(r => setTimeout(r, 500))
+// The licensing/backup API, local with fake Play purchases and the dev signing key.
+const apiState = mkdtempSync(join(tmpdir(), 'yes-chef-api-'))
+writeFileSync('api/.dev.vars', `LICENSE_PRIVATE_KEY='${JSON.stringify(JSON.parse(readFileSync('api/dev-license-key.json', 'utf8')))}'\nBACKUP_MASTER_KEY=${Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64')}\nRTDN_SECRET=dev\n`)
+const apiArgs = ['--config', 'api/wrangler.jsonc', '--env', 'dev', '--persist-to', apiState]
+execFileSync('npx', ['wrangler', 'd1', 'migrations', 'apply', 'DB', '--local', ...apiArgs], {stdio: 'ignore'})
+const api = spawn('npx', ['wrangler', 'dev', ...apiArgs, '--port', '8799'], {stdio: 'ignore', detached: true})
+for (const [name, url] of [['relay', 'http://localhost:8788/health'], ['api', 'http://localhost:8799/health']]) {
+  for (let i = 0; ; i++) {
+    try {
+      if ((await fetch(url)).ok) break
+    } catch {}
+    if (i > 120) throw new Error(`${name} did not start`)
+    await new Promise(r => setTimeout(r, 500))
+  }
 }
 const URL = 'http://localhost:8091/yes-chef/'
 
@@ -237,6 +245,22 @@ try {
     }
   })
 
+  await step('a licensed head backs up to the cloud and restores', async () => {
+    await head.locator('.tabs button', {hasText: 'Settings'}).click()
+    await head.getByText('free in the browser during early access').waitFor()
+    const result = await head.evaluate(() => window.__yesChef.activateLicense('test-active-77', {deviceName: 'Front tablet'}))
+    assert(result.ok, 'activation succeeded: ' + JSON.stringify(result))
+    await head.getByText('Subscription active. This tablet is the head.').waitFor()
+    await head.getByRole('button', {name: 'Back up now'}).click()
+    await head.getByText('Backed up to the cloud').waitFor()
+    await head.getByRole('button', {name: 'Restore from cloud'}).click()
+    await head.locator('.sheet li', {hasText: 'manual · from Front tablet'}).waitFor()
+    await shot(head, '17-cloud-restore')
+    await head.locator('.sheet li').first().getByRole('button', {name: 'Restore'}).click()
+    await head.getByRole('button', {name: 'Restore', exact: true}).last().click()
+    await head.getByText('Restored from the cloud').waitFor()
+  })
+
   await step('a new deploy shows the reload banner, and reload picks it up', async () => {
     // Serve an assembled copy, then change its version like a deploy would.
     const root = mkdtempSync(join(tmpdir(), 'yes-chef-site-'))
@@ -278,7 +302,11 @@ try {
 } finally {
   await browser.close()
   server.kill()
-  try {
-    process.kill(-relay.pid)
-  } catch {}
+  for (const p of [relay, api]) {
+    try {
+      process.kill(-p.pid)
+    } catch {}
+  }
+  rmSync('api/.dev.vars', {force: true})
+  rmSync(apiState, {recursive: true, force: true})
 }

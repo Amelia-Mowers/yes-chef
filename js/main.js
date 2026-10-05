@@ -7,6 +7,8 @@ import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
 import {registerServiceWorker} from './update.js'
 import {announceMove} from './moved.js'
+import {loadLicense, activateLicense, isLicensed} from './license.js'
+import {autoBackup, backupNow} from './cloud.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
 import {historyView} from './views/history.js'
@@ -130,7 +132,10 @@ function readPairingHash() {
 
 async function start() {
   applyTheme()
-  setHooks({toast: msg => toast(msg)})
+  setHooks({
+    toast: msg => toast(msg),
+    snapshot: reason => isLicensed() && backupNow(reason.toLowerCase()).catch(() => {})
+  })
   subscribe(render)
   await boot()
   const link = readPairingHash()
@@ -144,6 +149,9 @@ async function start() {
   }
   render()
   announceMove()
+  if (state.role === 'head') loadLicense().then(autoBackup)
+  // Local development only: lets tests activate a fake purchase.
+  if (location.hostname === 'localhost') window.__yesChef = {activateLicense}
 }
 
 registerServiceWorker()

@@ -67,6 +67,12 @@ jobs:
       - name: Deploy pairing relay to relay.yes-chef.win
         if: steps.cf.outputs.ready
         run: npx --yes wrangler@4 deploy --config relay/wrangler.jsonc
+      # Turned on (repository variable DEPLOY_API=true) once R2 and the API secrets exist.
+      - name: Migrate and deploy API to api.yes-chef.win
+        if: steps.cf.outputs.ready && vars.DEPLOY_API == 'true'
+        run: |
+          npx --yes wrangler@4 d1 migrations apply DB --remote --config api/wrangler.jsonc
+          npx --yes wrangler@4 deploy --config api/wrangler.jsonc
 
   # The old GitHub Pages address. Kept so installed tablets get the "moved" banner;
   # remove once nobody uses amelia-mowers.github.io/yes-chef.

@@ -266,6 +266,7 @@ export async function saveDraft(draft) {
 
 async function snapshot(reason) {
   await backups.add({ts: Date.now(), reason, menu: state.menu, menuDraft: state.menuDraft, settings: state.settings, events: state.events, epoch: state.epoch})
+  snapshotHook?.(reason) // cloud backup for licensed heads; never blocks
 }
 
 export async function publishMenu() {
@@ -566,9 +567,11 @@ document.addEventListener('visibilitychange', () => {
 // Hooks the UI sets for toasts and alerts.
 let toastHook = null
 let newEventHook = null
-export function setHooks({toast, newEvent}) {
-  toastHook = toast
-  newEventHook = newEvent
+let snapshotHook = null
+export function setHooks({toast, newEvent, snapshot}) {
+  if (toast) toastHook = toast
+  if (newEvent) newEventHook = newEvent
+  if (snapshot) snapshotHook = snapshot
 }
 
 export {closingStatus}
