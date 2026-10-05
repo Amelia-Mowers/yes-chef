@@ -2,7 +2,7 @@
 
 import {h, clear, confirmDialog, promptDialog, toast, downloadJson, pickJson, stamp} from '../ui.js'
 import {state, changeSettings, regenerateRoom, exportAll, importAll, clearHistory, setLocal, resetRole, unpairKitchen, renameKitchen} from '../store.js'
-import {shortCode, pairingUrl} from '../net.js'
+import {shortCode, pairingUrl, via} from '../net.js'
 import {DEFAULT_SETTINGS} from '../log.js'
 import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
@@ -15,6 +15,10 @@ function qrSvg(text) {
   qr.addData(text)
   qr.make()
   return qr.createSvgTag({cellSize: 6, margin: 2, scalable: true})
+}
+
+function viaText() {
+  return {relay: 'Connecting through the Yes Chef relay.', 'relay+public': 'Listening on the Yes Chef relay and public relays.', public: 'Connecting through public relays (the Yes Chef relay wasn’t reachable).'}[via] || ''
 }
 
 function toggle(label, on, onchange, hint) {
@@ -99,6 +103,7 @@ export function settingsView() {
         h('div', {class: 'qr', html: qrSvg(pairingUrl(state.room, state.secret))}),
         h('p', null, 'On another tablet, open Yes Chef, choose Kitchen or Order taker, and scan this code. Or type:'),
         h('p', {class: 'code mono'}, code),
+        h('p', {class: 'muted small'}, viaText()),
         h('h3', null, `Connected devices (${devices.length})`),
         devices.length ? h('ul', {class: 'plain'}, devices.map(d => h('li', null, '● ', d.name, h('span', {class: 'muted'}, ` · ${d.role === 'taker' ? 'order taker' : 'kitchen'}`)))) : h('p', {class: 'muted'}, 'None right now.'),
         h('button', {class: 'btn danger', onclick: async () => {
@@ -160,6 +165,7 @@ export function settingsView() {
           }}, 'Rename')
         ),
         h('p', null, state.headPeer ? '● Connected to the head device' : '○ Head device not reachable'),
+        h('p', {class: 'muted small'}, viaText()),
         p && h('p', {class: 'muted mono'}, `Room ${p.room}`),
         h('button', {class: 'btn danger', onclick: async () => {
           if (await confirmDialog({title: state.role === 'taker' ? 'Unpair this order taker?' : 'Unpair this kitchen?', message: 'Orders are removed from this tablet until you pair again.', confirm: 'Unpair', danger: true})) unpairKitchen()

@@ -1,0 +1,30 @@
+// relay.yes-chef.win: pairing/signaling relay (Worker + Durable Objects).
+// Deploy: npx wrangler deploy --config relay/wrangler.jsonc
+// Local:  npm run relay   (ws://localhost:8788, used by the e2e test)
+{
+  "name": "yes-chef-relay",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "routes": [{"pattern": "relay.yes-chef.win", "custom_domain": true}],
+  "workers_dev": false,
+  "durable_objects": {
+    "bindings": [{"name": "ROOMS", "class_name": "Room"}]
+  },
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["Room"]}],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://app.yes-chef.win,https://amelia-mowers.github.io",
+    "ALLOW_LOCALHOST": "false"
+  },
+  "env": {
+    "dev": {
+      "durable_objects": {
+        "bindings": [{"name": "ROOMS", "class_name": "Room"}]
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "https://app.yes-chef.win",
+        "ALLOW_LOCALHOST": "true"
+      }
+    }
+  },
+  "observability": {"enabled": true}
+}

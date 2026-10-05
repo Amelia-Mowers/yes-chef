@@ -10,7 +10,15 @@ import assert from 'node:assert/strict'
 const OUT = process.env.SHOTS || 'test/shots'
 mkdirSync(OUT, {recursive: true})
 const server = spawn('node', ['tools/serve.mjs'], {env: {...process.env, PORT: '8091'}, stdio: 'ignore'})
-await new Promise(r => setTimeout(r, 500))
+// Our signaling relay, run locally (the app on localhost looks for it on :8788).
+const relay = spawn('npx', ['wrangler', 'dev', '--config', 'relay/wrangler.jsonc', '--env', 'dev', '--port', '8788'], {stdio: 'ignore', detached: true})
+for (let i = 0; ; i++) {
+  try {
+    if ((await fetch('http://localhost:8788/health')).ok) break
+  } catch {}
+  if (i > 120) throw new Error('relay did not start')
+  await new Promise(r => setTimeout(r, 500))
+}
 const URL = 'http://localhost:8091/yes-chef/'
 
 // CHROMIUM_PATH lets systems without Playwright's bundled browser (e.g. NixOS) use their own.
@@ -61,6 +69,9 @@ try {
     await kit.getByRole('button', {name: 'Pair', exact: true}).click()
     await kit.locator('.badge.ok').waitFor({timeout: 60000})
     await head.locator('.badge.ok').waitFor({timeout: 30000})
+    await kit.locator('.tabs button', {hasText: 'Settings'}).click()
+    await kit.getByText('Connecting through the Yes Chef relay.').waitFor()
+    await kit.locator('.tabs button', {hasText: 'Tickets'}).click()
   })
 
   await step('head takes an order and sends it', async () => {
@@ -267,4 +278,7 @@ try {
 } finally {
   await browser.close()
   server.kill()
+  try {
+    process.kill(-relay.pid)
+  } catch {}
 }

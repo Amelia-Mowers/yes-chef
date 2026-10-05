@@ -10,7 +10,7 @@ Last updated 2026-10-05.
 |---|---|---|
 | 1 | Order-taker role | **Done** |
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
-| 3 | Own signaling relay | Not started |
+| 3 | Own signaling relay | **Done** |
 | 4 | Licensing and backup server | Not started |
 | 5 | Android app (TWA) | Not started |
 | 6 | Play Billing | Not started |
@@ -35,12 +35,13 @@ Already shipped along the way: plates, reload-on-update banner, Sheffield (menu 
 - [ ] Remove the GitHub Pages job once nobody uses the old address.
 - [ ] Optional: www.yes-chef.win redirect.
 
-## 3. Own signaling relay
+## 3. Own signaling relay — done
 
-Pairing currently uses free public Nostr relays (via Trystero). A paid product shouldn't depend on them.
-
-- [ ] Run a relay on Cloudflare (Worker + Durable Object WebSocket) and point Trystero at it, keeping public relays as fallback.
-- [ ] Monitor uptime.
+- [x] relay.yes-chef.win: Worker + one Durable Object per room (hibernating WebSockets) speaking Trystero's ws-relay protocol (`relay/`). Only Yes Chef origins may connect.
+- [x] Kitchens and order takers use it when reachable, else public Nostr relays; the head listens on both so every combination meets (older builds included).
+- [x] e2e runs the relay locally (`npm run relay`) and checks pairing went through it; CI deploys it.
+- [ ] Uptime monitoring (e.g. a health check on https://relay.yes-chef.win/health).
+- [ ] Look into a curl handshake with an Origin header returning 500 (real browsers connect fine).
 
 ## 4. Licensing and backup server
 

@@ -28,6 +28,7 @@ const SHELL = [
   'js/sheffield/instructions.js',
   'icons/sheffield.svg',
   'vendor/trystero.js',
+  'vendor/trystero-relay.js',
   'vendor/qr.js',
   'icons/icon.svg',
   'icons/icon-192.png',

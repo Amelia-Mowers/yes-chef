@@ -36,7 +36,8 @@ jobs:
           if-no-files-found: ignore
 
   # app.yes-chef.win (the app) and yes-chef.win (marketing site) as static-assets
-  # Workers (deploy/*/wrangler.jsonc, which also own the custom domains).
+  # Workers (deploy/*/wrangler.jsonc, which also own the custom domains), plus the
+  # pairing relay at relay.yes-chef.win (relay/).
   # Skipped until the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets exist.
   deploy-cloudflare:
     needs: test
@@ -63,6 +64,9 @@ jobs:
       - name: Deploy marketing site to yes-chef.win
         if: steps.cf.outputs.ready
         run: npx --yes wrangler@4 deploy --config deploy/site/wrangler.jsonc
+      - name: Deploy pairing relay to relay.yes-chef.win
+        if: steps.cf.outputs.ready
+        run: npx --yes wrangler@4 deploy --config relay/wrangler.jsonc
 
   # The old GitHub Pages address. Kept so installed tablets get the "moved" banner;
   # remove once nobody uses amelia-mowers.github.io/yes-chef.

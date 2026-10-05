@@ -122,6 +122,7 @@ async function headConnect() {
   net = await connect({
     room: state.room,
     secret: state.secret,
+    both: true,
     onPeerJoin: peerId => net.send('head', {epoch: state.epoch}, peerId),
     onPeerLeave: peerId => {
       state.devices.delete(peerId)
