@@ -7,14 +7,16 @@
 import {kv} from './db.js'
 import {state} from './store.js'
 import {LICENSE_PUBLIC_KEY, DEV_LICENSE_PUBLIC_KEY} from './license-key.js'
+import {inAndroidApp} from './platform.js'
 
 const DAY = 86400000
 export const GRACE_MS = 7 * DAY
 const local = () => location.hostname === 'localhost' || location.hostname === '127.0.0.1'
 export const API_URL = local() ? 'http://localhost:8799' : 'https://api.yes-chef.win'
 
-// The web version is free during early access. The Android app turns this on.
-export const ENFORCE = false
+// The head needs a subscription in the Android app. The browser version is free
+// during early access (until the app launches; see docs/ROADMAP.md).
+export const ENFORCE = inAndroidApp()
 
 const enc = new TextEncoder()
 const fromB64url = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (s.length % 4)) % 4)), c => c.charCodeAt(0))

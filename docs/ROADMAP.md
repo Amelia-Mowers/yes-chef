@@ -12,8 +12,8 @@ Last updated 2026-10-05.
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
 | 3 | Own signaling relay | **Done** |
 | 4 | Licensing and backup server | **Built and tested**; goes live when R2 is enabled |
-| 5 | Android app (TWA) | Not started |
-| 6 | Play Billing | Not started |
+| 5 | Android app (TWA) | **Built** (CI produces signed bundle + APK); needs Play Console |
+| 6 | Play Billing | **Built and tested with fake Play**; needs Play Console products |
 | 7 | Play Store setup and closed test | Not started |
 | 8 | Launch | Not started |
 | — | Pricing | **Decided**: $19/mo or $190/yr, 30-day trial |
@@ -68,16 +68,20 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 
 ## 5. Android app (Trusted Web Activity)
 
-- [ ] Build with Bubblewrap (or PWABuilder) pointing at app.yes-chef.win.
-- [ ] Serve `https://app.yes-chef.win/.well-known/assetlinks.json` (check that static assets upload dot-folders; may need `.assetsignore` handling).
-- [ ] Signing key in Play App Signing; keep the upload key safe.
+- [x] `android/twa-manifest.json` (package `win.yeschef.app`, Play Billing on); `tools/android.mjs` generates the project with Bubblewrap.
+- [x] "Android app" workflow builds a signed Play bundle (.aab) and test APK (run by hand, or push a tag `android-vX.Y.Z`).
+- [x] Upload key generated (kept in `~/yes-chef-android-keys/`, also in repo secrets `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD`). **Back it up.**
+- [x] `https://app.yes-chef.win/.well-known/assetlinks.json` with the upload key fingerprint.
+- [ ] After creating the app in Play Console: add the **Play App Signing** key's SHA-256 to `assetlinks.json` (otherwise the Play-installed app shows a browser bar).
 - [ ] Capacitor later only if native features are needed (kitchen printers, stronger keep-alive).
 
 ## 6. Play Billing
 
-- [ ] Play Console: one subscription product, base plans $19/month and $190/year, 30-day free-trial offer.
-- [ ] App: Digital Goods API + Payment Request API inside the TWA; send purchase token to the licensing server.
-- [ ] License testers for development; restore purchases.
+- [ ] Play Console: two subscription products, **`yes_chef_monthly`** ($19/month) and **`yes_chef_yearly`** ($190/year), each with a 30-day free-trial offer.
+- [x] App (`js/billing.js`): Digital Goods API + Payment Request API inside the app; purchase token → `api.yes-chef.win` activates the license. Restore purchase; offer to move from another tablet.
+- [x] In the Android app the head's Order screen becomes "Start your 30-day free trial" until subscribed (`js/views/subscribe.js`); kitchens and order takers never need a subscription. Browser stays free (`ENFORCE` only in the app).
+- [x] Lapsed/moved heads lose the Order screen after the offline grace period; history, menu and settings stay available; kitchens keep their tickets.
+- [ ] License testers for development; test real purchases on the internal track.
 - [ ] Note: Google takes 15% on subscriptions and is merchant of record (handles tax). Check current US/regional rules on outside payment links before relying on them.
 
 ## 7. Play Store setup and closed test

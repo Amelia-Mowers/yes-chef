@@ -7,7 +7,8 @@ import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
 import {registerServiceWorker} from './update.js'
 import {announceMove} from './moved.js'
-import {loadLicense, activateLicense, isLicensed} from './license.js'
+import {loadLicense, activateLicense, isLicensed, ENFORCE, onLicense, licenseStatus} from './license.js'
+import {subscribeView} from './views/subscribe.js'
 import {autoBackup, backupNow} from './cloud.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
@@ -49,7 +50,10 @@ function go(key) {
   let view
   // Kitchens and order takers start on a pairing screen, then wait for the head's first sync.
   const firstTab = TABS[role][0][0]
-  if (isClient(role) && !state.pairing && key === firstTab) view = pairView()
+  // Android app: taking orders on the head needs a subscription (kitchens and
+  // order takers are free). History, menu and settings stay available.
+  if (role === 'head' && key === 'order' && ENFORCE && !isLicensed()) view = subscribeView()
+  else if (isClient(role) && !state.pairing && key === firstTab) view = pairView()
   else if (isClient(role) && key === firstTab && !state.headPeer && !state.events.length) view = waitingView()
   else view = TABS[role].find(t => t[0] === key)[2]({go})
   current = {key, view, waiting: view.el.classList.contains('empty')}
@@ -150,6 +154,13 @@ async function start() {
   render()
   announceMove()
   if (state.role === 'head') loadLicense().then(autoBackup)
+  // Swap the order screen and the subscription screen as the license changes.
+  let licensed = isLicensed()
+  onLicense(() => {
+    if (isLicensed() !== licensed && state.role === 'head' && current?.key === 'order') go('order')
+    licensed = isLicensed()
+    if (ENFORCE && licenseStatus() === 'grace') toast('Yes Chef couldn’t check your subscription lately. Connect to the internet within a few days to keep taking orders.', {duration: 8000})
+  })
   // Local development only: lets tests activate a fake purchase.
   if (location.hostname === 'localhost') window.__yesChef = {activateLicense}
 }

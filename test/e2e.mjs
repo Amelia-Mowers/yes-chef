@@ -261,6 +261,48 @@ try {
     await head.getByText('Restored from the cloud').waitFor()
   })
 
+  await step('Android app: head needs a subscription, trial unlocks it, a second tablet is offered the move', async () => {
+    // Pretend to be the Trusted Web Activity with Play Billing (fake purchase tokens).
+    const fakePlay = token => {
+      localStorage.setItem('yes-chef-android-app', '1')
+      window.getDigitalGoodsService = async () => ({
+        getDetails: async ids => ids.map(itemId => ({itemId, price: {currency: 'USD', value: itemId.includes('yearly') ? '190' : '19'}, freeTrialPeriod: 'P30D'})),
+        listPurchases: async () => [{itemId: 'yes_chef_monthly', purchaseToken: token}]
+      })
+      window.PaymentRequest = class {
+        async show() {
+          return {details: {purchaseToken: token}, complete: async () => {}}
+        }
+      }
+    }
+    const tablets = []
+    try {
+      for (let i = 0; i < 2; i++) {
+        const ctx = await browser.newContext({viewport})
+        await ctx.addInitScript(fakePlay, 'test-active-501')
+        const p = await ctx.newPage()
+        tablets.push(ctx)
+        await p.goto(URL)
+        await p.getByRole('button', {name: /Head/}).click()
+        await p.getByRole('heading', {name: 'Start your 30-day free trial'}).waitFor()
+        if (i === 0) {
+          await p.locator('.plan', {hasText: '$190.00 / year'}).waitFor()
+          await shot(p, '18-paywall')
+          await p.locator('.plan', {hasText: 'Monthly'}).click()
+          await p.getByText('Subscription active').first().waitFor()
+          await p.locator('.order-screen').waitFor() // order screen unlocked
+        } else {
+          await p.getByRole('button', {name: 'Restore purchase'}).click()
+          await p.getByText('Move the subscription to this tablet?').waitFor()
+          await p.getByRole('button', {name: 'Move it here'}).click()
+          await p.locator('.order-screen').waitFor()
+        }
+      }
+    } finally {
+      for (const ctx of tablets) await ctx.close()
+    }
+  })
+
   await step('a new deploy shows the reload banner, and reload picks it up', async () => {
     // Serve an assembled copy, then change its version like a deploy would.
     const root = mkdtempSync(join(tmpdir(), 'yes-chef-site-'))
