@@ -8,7 +8,7 @@ Last updated 2026-10-05.
 
 | # | Step | Status |
 |---|---|---|
-| 1 | Order-taker role | Not started |
+| 1 | Order-taker role | **Done** |
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
 | 3 | Own signaling relay | Not started |
 | 4 | Licensing and backup server | Not started |
@@ -20,12 +20,12 @@ Last updated 2026-10-05.
 
 Already shipped along the way: plates, reload-on-update banner, Sheffield (menu via your own chat assistant), marketing site, CI that tests then deploys to Cloudflare.
 
-## 1. Order-taker role
+## 1. Order-taker role — done
 
-- [ ] New role: a second ordering screen that sends orders to the head as intents (like kitchens send status changes). The head assigns `seq` and the order number and broadcasts. One source of truth stays.
-- [ ] Pairing for order takers (same QR/code as kitchens, different role).
-- [ ] Order takers see their own sent orders, can modify/cancel through the head.
-- [ ] Tests: head + order taker + kitchen end to end.
+- [x] New role: a second ordering screen that sends orders to the head as intents (like kitchens send status changes). The head assigns `seq` and the order number and broadcasts. One source of truth stays.
+- [x] Pairing for order takers (same QR/code as kitchens, different role); the head lists connected devices with their role.
+- [x] Order takers see all orders in History and can modify, cancel and undo through the head; orders queue while the head is offline.
+- [x] Tests: head + order taker + kitchen end to end.
 
 ## 2. Own domain — done
 

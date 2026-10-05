@@ -1,7 +1,7 @@
 // App shell: role choice, tabs, connection badge.
 
 import {h, clear, toast} from './ui.js'
-import {state, boot, subscribe, chooseRole, pairKitchen, setHooks} from './store.js'
+import {state, boot, subscribe, chooseRole, pairKitchen, setHooks, isClient} from './store.js'
 import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
@@ -19,6 +19,11 @@ const TABS = {
     ['order', 'Order', orderView],
     ['history', 'History', historyView],
     ['menu', 'Menu', menuView],
+    ['settings', 'Settings', settingsView]
+  ],
+  taker: [
+    ['order', 'Order', orderView],
+    ['history', 'History', historyView],
     ['settings', 'Settings', settingsView]
   ],
   kitchen: [
@@ -40,8 +45,10 @@ function go(key) {
   current?.view.destroy?.()
   const role = state.role
   let view
-  if (role === 'kitchen' && !state.pairing && key === 'tickets') view = pairView()
-  else if (role === 'kitchen' && key === 'tickets' && !state.headPeer && !state.events.length) view = waitingView()
+  // Kitchens and order takers start on a pairing screen, then wait for the head's first sync.
+  const firstTab = TABS[role][0][0]
+  if (isClient(role) && !state.pairing && key === firstTab) view = pairView()
+  else if (isClient(role) && key === firstTab && !state.headPeer && !state.events.length) view = waitingView()
   else view = TABS[role].find(t => t[0] === key)[2]({go})
   current = {key, view, waiting: view.el.classList.contains('empty')}
   clear(viewEl, view.el)
@@ -51,9 +58,9 @@ function go(key) {
 
 function renderBadge() {
   if (state.role === 'head') {
-    const n = state.kitchens.size
+    const n = state.devices.size
     badgeEl.className = 'badge ' + (n ? 'ok' : 'idle')
-    badgeEl.textContent = n ? `${n} kitchen${n === 1 ? '' : 's'}` : 'No kitchens'
+    badgeEl.textContent = n ? `${n} device${n === 1 ? '' : 's'}` : 'No devices'
   } else if (!state.pairing) {
     badgeEl.className = 'badge idle'
     badgeEl.textContent = 'Not paired'
@@ -71,9 +78,10 @@ function renderRoleChoice() {
       h('p', {class: 'muted'}, 'What is this tablet for?'),
       h('div', {class: 'role-btns'},
         h('button', {class: 'role-btn', onclick: () => chooseRole('head')}, h('strong', null, 'Head'), h('span', null, 'Take orders, design the menu')),
-        h('button', {class: 'role-btn', onclick: () => chooseRole('kitchen')}, h('strong', null, 'Kitchen'), h('span', null, 'Show tickets, mark them done'))
+        h('button', {class: 'role-btn', onclick: () => chooseRole('kitchen')}, h('strong', null, 'Kitchen'), h('span', null, 'Show tickets, mark them done')),
+        h('button', {class: 'role-btn', onclick: () => chooseRole('taker')}, h('strong', null, 'Order taker'), h('span', null, 'Take orders and send them through the head'))
       ),
-      h('p', {class: 'muted small'}, 'Use one head tablet and any number of kitchen tablets on the same Wi-Fi.')
+      h('p', {class: 'muted small'}, 'Use one head tablet, plus any number of kitchen and order-taker tablets on the same Wi-Fi.')
     )
   )
 }
@@ -127,7 +135,7 @@ async function start() {
   await boot()
   const link = readPairingHash()
   if (link) {
-    if (state.role === 'head') toast('This is the head device. Open the pairing link on a kitchen tablet.')
+    if (state.role === 'head') toast('This is the head device. Open the pairing link on a kitchen or order-taker tablet.')
     else {
       if (!state.role) await chooseRole('kitchen')
       await pairKitchen(link)

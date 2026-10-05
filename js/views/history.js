@@ -1,7 +1,7 @@
 // History for both roles, read from the event log.
 
 import {h, clear, sheet, sheetHeader, confirmDialog, toast, clock, dayLabel} from '../ui.js'
-import {state, subscribe, undoEvent, cancelOrder, headSetStatus, kitchenSetStatus} from '../store.js'
+import {state, subscribe, undoEvent, cancelOrder, headSetStatus, kitchenSetStatus, isClient} from '../store.js'
 import {STATUS_LABEL, UNDOABLE, describeEvent, enabledStatuses, lineText, groupByPlate, plateLabel} from '../log.js'
 import {startEditing} from './order.js'
 
@@ -61,8 +61,9 @@ function activeUndoOf(seq) {
 
 function deviceLabel(id) {
   if (id === state.deviceId) return 'this device'
-  for (const k of state.kitchens.values()) if (k.deviceId === id) return k.name
-  return id?.startsWith('dev_') ? 'kitchen' : 'head'
+  for (const d of state.devices.values()) if (d.deviceId === id) return d.name
+  if (state.role === 'head') return 'a paired device'
+  return id === state.headDeviceId ? 'head' : 'another device'
 }
 
 export function historyView({go}) {
@@ -143,6 +144,8 @@ export function historyView({go}) {
       const isHead = state.role === 'head'
       const active = !o.undone && !o.cancelled
       const statuses = enabledStatuses(state.settings)
+      // The head and order takers can change orders; kitchens only move statuses.
+      const canEdit = state.role !== 'kitchen'
       const setStatus = isHead ? headSetStatus : kitchenSetStatus
 
       return h('div', null,
@@ -152,12 +155,12 @@ export function historyView({go}) {
           h('ul', {class: 'detail-lines'}, entries.map(({line: l}) => h('li', null, lineText(l), l.note && h('span', {class: 'line-note'}, ` “${l.note}”`))))
         ]),
         active && h('div', {class: 'row gap wrap'},
-          isHead && h('button', {class: 'btn primary', onclick: () => {
+          canEdit && h('button', {class: 'btn primary', onclick: () => {
             startEditing(o)
             close()
             go('order')
           }}, 'Modify'),
-          isHead && h('button', {class: 'btn danger', onclick: async () => {
+          canEdit && h('button', {class: 'btn danger', onclick: async () => {
             if (await confirmDialog({title: `Cancel order #${o.number}?`, message: 'The kitchen will see it marked cancelled. You can undo this from the timeline.', confirm: 'Cancel order', cancel: 'Keep', danger: true})) {
               await cancelOrder(o.id)
               toast(`Order #${o.number} cancelled`)
@@ -175,7 +178,7 @@ export function historyView({go}) {
         h('ol', {class: 'timeline'}, o.eventSeqs.map(seq => {
           const e = bySeq.get(seq)
           const isUndone = undone.has(seq)
-          const canAct = UNDOABLE.has(e.type) && (isHead || e.type !== 'order.created')
+          const canAct = UNDOABLE.has(e.type) && (canEdit || e.type !== 'order.created')
           const redoVia = isUndone && activeUndoOf(seq)
           return h('li', {class: isUndone ? 'undone' : ''},
             h('span', {class: 'tl-time'}, clock(e.ts)),
@@ -191,7 +194,7 @@ export function historyView({go}) {
             }}, 'Redo')
           )
         })),
-        state.role === 'kitchen' && state.pending.length > 0 && h('p', {class: 'muted'}, 'Some changes are waiting for the head device.')
+        isClient() && state.pending.length > 0 && h('p', {class: 'muted'}, 'Some changes are waiting for the head device.')
       )
     }, {wide: true, onClose: () => unsub?.()})
     // Keep the timeline live while it is open (kitchen changes land asynchronously).

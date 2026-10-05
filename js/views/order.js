@@ -1,7 +1,7 @@
 // Head device: take an order and send it to the kitchen.
 
 import {h, clear, sheet, sheetHeader, toast, confirmDialog} from '../ui.js'
-import {state, sendOrder, modifyOrder, undoEvent} from '../store.js'
+import {state, sendOrder, modifyOrder, undoEvent, isClient} from '../store.js'
 import {diffLines, groupByPlate, platesOf, compactPlates, plateLabel} from '../log.js'
 
 // The ticket being built survives switching tabs, and is kept in localStorage
@@ -157,14 +157,25 @@ export function orderView({go}) {
         return
       }
       await modifyOrder(order.id, {name: ticket.name.trim(), lines: ticket.lines, changes})
-      toast(`Order #${order.number} updated`)
+      toast(isClient() ? `Changes to order #${order.number} sent to the head` : `Order #${order.number} updated`)
       resetTicket()
       renderTicket()
       return
     }
-    const evt = await sendOrder({name: ticket.name.trim(), lines: ticket.lines})
+    const result = await sendOrder({name: ticket.name.trim(), lines: ticket.lines})
     resetTicket()
     renderTicket()
+    let evt = result.event
+    if (result.queued) {
+      // Order takers: the head numbers the order; wait for it (queued if offline).
+      toast(state.headPeer ? 'Sending…' : 'Head offline: order queued, it will send when the head is back.', {duration: state.headPeer ? 2500 : 6000})
+      try {
+        evt = await result.sent
+      } catch (err) {
+        toast(`The head declined that order: ${err.message}`, {duration: 6000})
+        return
+      }
+    }
     toast(`Order #${evt.payload.number} sent`, {
       action: 'Undo',
       duration: 10000,

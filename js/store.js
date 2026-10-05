@@ -1,5 +1,6 @@
-// App state for both roles. The head device owns the event log and assigns
-// `seq`; kitchens mirror it and send intents that the head turns into events.
+// App state for every role. The head device owns the event log and assigns
+// `seq`; kitchens and order takers ("clients") mirror it and send intents that
+// the head turns into events.
 
 import {kv, events as eventsDb, backups, requestPersistence} from './db.js'
 import {connect, randomCode, ROOM_LEN, SECRET_LEN} from './net.js'
@@ -8,7 +9,7 @@ import {replay, nextOrderNumber, DEFAULT_SETTINGS, UNDOABLE, recallTarget, closi
 const listeners = new Set()
 
 export const state = {
-  role: null, // 'head' | 'kitchen'
+  role: null, // 'head' | 'kitchen' | 'taker'
   deviceId: null,
   events: [],
   derived: replay([]),
@@ -19,10 +20,11 @@ export const state = {
   // head
   room: null,
   secret: null,
-  kitchens: new Map(), // peerId → {deviceId, name}
+  devices: new Map(), // peerId → {deviceId, name, role} for paired kitchens and order takers
   // kitchen
   pairing: null, // {room, secret, name}
   headPeer: null,
+  headDeviceId: null, // learned from the head's sync, for labelling history
   pending: [], // queued intents not yet confirmed by the head
   dismissed: new Set(), // cancelled tickets cleared from this kitchen's screen
   // device-local
@@ -44,6 +46,9 @@ function rederive() {
   state.derived = replay(state.events)
 }
 
+export const isClient = (role = state.role) => role === 'kitchen' || role === 'taker'
+export const ROLE_LABEL = {head: 'Head', kitchen: 'Kitchen', taker: 'Order taker'}
+
 const uid = prefix => `${prefix}_${crypto.randomUUID().replace(/-/g, '').slice(0, 10)}`
 
 export const lastSeq = () => (state.events.length ? state.events[state.events.length - 1].seq : 0)
@@ -62,7 +67,7 @@ export async function boot() {
   state.epoch = (await kv.get('epoch')) || null
   rederive()
   if (state.role === 'head') await startHead()
-  else if (state.role === 'kitchen') await startKitchen()
+  else if (isClient()) await startKitchen()
   emit()
 }
 
@@ -79,7 +84,7 @@ export async function resetRole() {
   net = null
   state.role = null
   state.headPeer = null
-  state.kitchens.clear()
+  state.devices.clear()
   await kv.del('role')
   emit()
 }
@@ -113,18 +118,19 @@ async function newEpoch() {
 
 async function headConnect() {
   await net?.leave()
-  state.kitchens.clear()
+  state.devices.clear()
   net = await connect({
     room: state.room,
     secret: state.secret,
     onPeerJoin: peerId => net.send('head', {epoch: state.epoch}, peerId),
     onPeerLeave: peerId => {
-      state.kitchens.delete(peerId)
+      state.devices.delete(peerId)
       emit()
     },
     handlers: {
       hello: (d, peerId) => {
-        state.kitchens.set(peerId, {deviceId: d.deviceId, name: d.name || 'Kitchen'})
+        const role = d.role === 'taker' ? 'taker' : 'kitchen'
+        state.devices.set(peerId, {deviceId: d.deviceId, name: d.name || ROLE_LABEL[role], role})
         emit()
         sendSync(peerId, d.epoch === state.epoch ? d.lastSeq : 0)
       },
@@ -141,6 +147,7 @@ function sendSync(peerId, afterSeq) {
     {
       epoch: state.epoch,
       full,
+      headDeviceId: state.deviceId,
       menu: state.menu,
       settings: state.settings,
       events: state.events.filter(e => e.seq > afterSeq)
@@ -187,12 +194,24 @@ async function handleIntent(intent, peerId) {
     net?.send('evt', {epoch: state.epoch, event: existing}, peerId)
     return
   }
-  const device = state.kitchens.get(peerId)?.deviceId || peerId
+  const device = state.devices.get(peerId)?.deviceId || peerId
   const {orders, undone} = state.derived
   if (intent.type === 'status.changed') {
     const order = orders.get(intent.orderId)
     if (!order || order.undone || order.cancelled) return rejectIntent(intent, peerId, 'Order is no longer active')
     await append({type: 'status.changed', orderId: intent.orderId, payload: {status: intent.payload.status, from: order.status}, device, intentId: intent.intentId})
+  } else if (intent.type === 'order.created') {
+    // From an order taker: the head assigns the number, like any other order.
+    const {name = '', lines} = intent.payload || {}
+    if (!intent.orderId || !Array.isArray(lines) || !lines.length) return rejectIntent(intent, peerId, 'The order was empty')
+    if (orders.has(intent.orderId)) return rejectIntent(intent, peerId, 'That order already exists')
+    await append({type: 'order.created', orderId: intent.orderId, payload: {number: nextOrderNumber(state.events), name, lines}, device, intentId: intent.intentId})
+  } else if (intent.type === 'order.modified' || intent.type === 'order.cancelled') {
+    const order = orders.get(intent.orderId)
+    if (!order || order.undone || order.cancelled) return rejectIntent(intent, peerId, 'Order is no longer active')
+    const payload = intent.type === 'order.modified' ? {name: intent.payload.name ?? order.name, lines: intent.payload.lines, changes: intent.payload.changes || []} : {}
+    if (intent.type === 'order.modified' && !Array.isArray(payload.lines)) return rejectIntent(intent, peerId, 'The change was empty')
+    await append({type: intent.type, orderId: intent.orderId, payload, device, intentId: intent.intentId})
   } else if (intent.type === 'undo') {
     const target = state.derived.bySeq.get(intent.payload.targetSeq)
     if (!target || !UNDOABLE.has(target.type) || undone.has(target.seq)) return rejectIntent(intent, peerId, 'Nothing to undo')
@@ -204,16 +223,25 @@ function rejectIntent(intent, peerId, reason) {
   net?.send('reject', {intentId: intent.intentId, reason}, peerId)
 }
 
+// Sends a new order. Resolves to {event} on the head; on an order taker it
+// resolves to {queued: true, sent} where `sent` resolves with the event once the
+// head has numbered it (or rejects if the head declines).
 export async function sendOrder({name, lines}) {
   const orderId = uid('ord')
-  return append({type: 'order.created', orderId, payload: {number: nextOrderNumber(state.events), name, lines}})
+  if (isClient()) {
+    const intent = await queueIntent({type: 'order.created', orderId, payload: {name, lines}})
+    return {queued: true, sent: whenConfirmed(intent.intentId)}
+  }
+  return {event: await append({type: 'order.created', orderId, payload: {number: nextOrderNumber(state.events), name, lines}})}
 }
 
 export async function modifyOrder(orderId, {name, lines, changes}) {
+  if (isClient()) return queueIntent({type: 'order.modified', orderId, payload: {name, lines, changes}})
   return append({type: 'order.modified', orderId, payload: {name, lines, changes}})
 }
 
 export async function cancelOrder(orderId) {
+  if (isClient()) return queueIntent({type: 'order.cancelled', orderId})
   return append({type: 'order.cancelled', orderId})
 }
 
@@ -225,7 +253,7 @@ export async function headSetStatus(orderId, status) {
 export async function undoEvent(targetSeq) {
   const target = state.derived.bySeq.get(targetSeq)
   if (!target || !UNDOABLE.has(target.type)) return
-  if (state.role === 'kitchen') return queueIntent({type: 'undo', orderId: target.orderId, payload: {targetSeq}})
+  if (isClient()) return queueIntent({type: 'undo', orderId: target.orderId, payload: {targetSeq}})
   return append({type: 'undo', orderId: target.orderId, payload: {targetSeq}})
 }
 
@@ -325,7 +353,7 @@ export function emptyMenu() {
   return {version: 0, categories: [], modifierGroups: []}
 }
 
-// ---------- kitchen ----------
+// ---------- kitchens and order takers ----------
 
 async function startKitchen() {
   state.pairing = (await kv.get('pairing')) || null
@@ -336,7 +364,7 @@ async function startKitchen() {
 
 export async function pairKitchen({room, secret}, name) {
   const sameRoom = state.pairing?.room === room
-  state.pairing = {room, secret, name: name || state.pairing?.name || 'Kitchen'}
+  state.pairing = {room, secret, name: name || state.pairing?.name || ROLE_LABEL[state.role] || 'Kitchen'}
   await kv.set('pairing', state.pairing)
   if (!sameRoom) await resetMirror()
   await kitchenConnect()
@@ -370,7 +398,7 @@ async function resetMirror() {
 }
 
 function sayHello(peerId) {
-  net?.send('hello', {deviceId: state.deviceId, name: state.pairing?.name, lastSeq: lastSeq(), epoch: state.epoch}, peerId)
+  net?.send('hello', {deviceId: state.deviceId, name: state.pairing?.name, role: state.role, lastSeq: lastSeq(), epoch: state.epoch}, peerId)
 }
 
 let resendTimer = null
@@ -400,7 +428,10 @@ async function kitchenConnect() {
       },
       reject: async d => {
         await dropPending(d.intentId)
-        toastHook?.(`Head device declined: ${d.reason}`)
+        const waiter = waiters.get(d.intentId)
+        waiters.delete(d.intentId)
+        if (waiter) waiter.reject(new Error(d.reason))
+        else toastHook?.(`Head device declined: ${d.reason}`)
       }
     }
   })
@@ -411,13 +442,16 @@ async function kitchenConnect() {
 
 async function applySync(d, peerId) {
   state.headPeer = peerId
+  state.headDeviceId = d.headDeviceId || state.headDeviceId
   if (d.full || d.epoch !== state.epoch) {
     state.events = d.events
     await eventsDb.replaceAll(d.events)
-    if (d.epoch !== state.epoch) {
+    if (state.epoch && d.epoch !== state.epoch) {
       // The head's log was replaced; queued intents refer to the old one.
       state.pending = []
       await kv.set('pending', [])
+      for (const w of waiters.values()) w.reject(new Error('The head device’s history was reset'))
+      waiters.clear()
     }
   } else if (d.events.length) {
     const have = new Set(state.events.map(e => e.seq))
@@ -454,7 +488,26 @@ async function applyEvent({epoch, event}, peerId) {
   emit()
 }
 
+// Callers waiting for the head to confirm a specific intent (order takers
+// waiting for their order's number).
+const waiters = new Map()
+
+function whenConfirmed(intentId) {
+  const done = state.events.find(e => e.intentId === intentId)
+  if (done) return Promise.resolve(done)
+  return new Promise((resolve, reject) => waiters.set(intentId, {resolve, reject}))
+}
+
 async function confirmPending() {
+  if (waiters.size) {
+    for (const e of state.events) {
+      const w = e.intentId && waiters.get(e.intentId)
+      if (w) {
+        waiters.delete(e.intentId)
+        w.resolve(e)
+      }
+    }
+  }
   const seen = new Set(state.events.map(e => e.intentId).filter(Boolean))
   const before = state.pending.length
   state.pending = state.pending.filter(p => !seen.has(p.intentId))
@@ -473,6 +526,7 @@ async function queueIntent(intent) {
   await kv.set('pending', state.pending)
   emit()
   if (state.headPeer) net?.send('intent', full, state.headPeer)
+  return full
 }
 
 function resendPending() {
@@ -481,7 +535,7 @@ function resendPending() {
 }
 
 export async function kitchenSetStatus(orderId, status) {
-  if (state.role === 'head') return headSetStatus(orderId, status)
+  if (!isClient()) return headSetStatus(orderId, status)
   return queueIntent({type: 'status.changed', orderId, payload: {status}})
 }
 
@@ -504,7 +558,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return
   clearTimeout(wakeCheck)
   wakeCheck = setTimeout(() => {
-    if (state.role === 'kitchen' && state.pairing && !state.headPeer) kitchenConnect()
+    if (isClient() && state.pairing && !state.headPeer) kitchenConnect()
   }, 4000)
 })
 

@@ -67,7 +67,7 @@ function aboutSection() {
 function roleSection() {
   return h('section', {class: 'panel'},
     h('h2', null, 'Device role'),
-    h('p', {class: 'muted'}, `This device is the ${state.role === 'head' ? 'head (order taking)' : 'kitchen'} device. Data on it is kept.`),
+    h('p', {class: 'muted'}, `This device is ${{head: 'the head (order taking)', kitchen: 'a kitchen', taker: 'an order taker'}[state.role]} device. Data on it is kept.`),
     h('button', {class: 'btn', onclick: async () => {
       if (await confirmDialog({title: 'Switch role?', message: 'You will pick Head or Kitchen again.', confirm: 'Switch'})) resetRole()
     }}, 'Switch role')
@@ -84,7 +84,7 @@ export function settingsView() {
       render()
     }
     const code = shortCode(state.room, state.secret)
-    const kitchens = [...state.kitchens.values()]
+    const devices = [...state.devices.values()]
 
     clear(el,
       h('section', {class: 'panel'},
@@ -95,14 +95,14 @@ export function settingsView() {
         toggle('Picked up', statuses.pickedup, v => setStatus('pickedup', v), 'Tickets stay on screen after Done until picked up.')
       ),
       h('section', {class: 'panel pairing'},
-        h('h2', null, 'Pair a kitchen'),
+        h('h2', null, 'Pair a device'),
         h('div', {class: 'qr', html: qrSvg(pairingUrl(state.room, state.secret))}),
-        h('p', null, 'In the kitchen tablet’s Yes Chef app, choose Kitchen and scan this code. Or type:'),
+        h('p', null, 'On another tablet, open Yes Chef, choose Kitchen or Order taker, and scan this code. Or type:'),
         h('p', {class: 'code mono'}, code),
-        h('h3', null, `Connected kitchens (${kitchens.length})`),
-        kitchens.length ? h('ul', {class: 'plain'}, kitchens.map(k => h('li', null, '● ', k.name))) : h('p', {class: 'muted'}, 'None right now.'),
+        h('h3', null, `Connected devices (${devices.length})`),
+        devices.length ? h('ul', {class: 'plain'}, devices.map(d => h('li', null, '● ', d.name, h('span', {class: 'muted'}, ` · ${d.role === 'taker' ? 'order taker' : 'kitchen'}`)))) : h('p', {class: 'muted'}, 'None right now.'),
         h('button', {class: 'btn danger', onclick: async () => {
-          if (!(await confirmDialog({title: 'Regenerate room code?', message: 'Every kitchen will need to pair again.', confirm: 'Regenerate', danger: true}))) return
+          if (!(await confirmDialog({title: 'Regenerate room code?', message: 'Every kitchen and order taker will need to pair again.', confirm: 'Regenerate', danger: true}))) return
           await regenerateRoom()
           render()
         }}, 'Regenerate room code')
@@ -129,7 +129,7 @@ export function settingsView() {
             render()
           }}, 'Import'),
           h('button', {class: 'btn danger', onclick: async () => {
-            const answer = await confirmDialog({title: 'Clear all history?', message: 'Every order and event is removed from this tablet and from kitchens. A backup is taken first.', confirm: 'Clear history', extra: 'Export first', danger: true})
+            const answer = await confirmDialog({title: 'Clear all history?', message: 'Every order and event is removed from this tablet and from paired devices. A backup is taken first.', confirm: 'Clear history', extra: 'Export first', danger: true})
             if (answer === 'extra') downloadJson(exportAll(), `yes-chef-backup-${stamp()}.json`)
             if (answer === true) {
               await clearHistory()
@@ -149,10 +149,10 @@ export function settingsView() {
     const p = state.pairing
     clear(el,
       h('section', {class: 'panel'},
-        h('h2', null, 'This kitchen'),
+        h('h2', null, state.role === 'taker' ? 'This order taker' : 'This kitchen'),
         h('p', null, h('strong', null, p?.name || 'Kitchen'), ' ',
           h('button', {class: 'btn small', onclick: async () => {
-            const name = await promptDialog({title: 'Rename kitchen', label: 'Name', value: p?.name})
+            const name = await promptDialog({title: state.role === 'taker' ? 'Rename this device' : 'Rename kitchen', label: 'Name', value: p?.name})
             if (name) {
               await renameKitchen(name)
               render()
@@ -162,7 +162,7 @@ export function settingsView() {
         h('p', null, state.headPeer ? '● Connected to the head device' : '○ Head device not reachable'),
         p && h('p', {class: 'muted mono'}, `Room ${p.room}`),
         h('button', {class: 'btn danger', onclick: async () => {
-          if (await confirmDialog({title: 'Unpair this kitchen?', message: 'Tickets are removed from this tablet until you pair again.', confirm: 'Unpair', danger: true})) unpairKitchen()
+          if (await confirmDialog({title: state.role === 'taker' ? 'Unpair this order taker?' : 'Unpair this kitchen?', message: 'Orders are removed from this tablet until you pair again.', confirm: 'Unpair', danger: true})) unpairKitchen()
         }}, 'Unpair')
       ),
       screenSection(),
@@ -176,7 +176,7 @@ export function settingsView() {
 
   // Re-render only when connection details change, so toggles don't flicker.
   let sig = ''
-  const signature = () => `${state.room}|${state.kitchens.size}|${[...state.kitchens.values()].map(k => k.name)}|${state.headPeer}|${state.events.length}`
+  const signature = () => `${state.room}|${state.devices.size}|${[...state.devices.values()].map(k => k.name)}|${state.headPeer}|${state.events.length}`
   sig = signature()
   return {
     el,

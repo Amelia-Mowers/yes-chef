@@ -1,7 +1,7 @@
 // Kitchen first run: scan the head device's QR code, or type the short code.
 
 import {h, toast} from '../ui.js'
-import {pairKitchen} from '../store.js'
+import {pairKitchen, state, ROLE_LABEL} from '../store.js'
 import {parsePairing} from '../net.js'
 import {jsQR} from '../../vendor/qr.js'
 
@@ -11,12 +11,12 @@ export function pairView({prefill} = {}) {
   const status = h('p', {class: 'muted'}, 'Point the camera at the QR code in the head device’s Settings.')
   const scanBox = h('div', {class: 'scan-box'}, video, h('div', {class: 'scan-frame'}))
   const codeInput = h('input', {class: 'input big mono', placeholder: 'XXXX-XXXX-XXXX-XXXX', autocapitalize: 'characters', autocomplete: 'off', spellcheck: false, value: prefill || '', 'aria-label': 'Pairing code'})
-  const nameInput = h('input', {class: 'input big', value: 'Kitchen', 'aria-label': 'Kitchen name'})
+  const nameInput = h('input', {class: 'input big', value: ROLE_LABEL[state.role] || 'Kitchen', 'aria-label': state.role === 'taker' ? 'Device name' : 'Kitchen name'})
   const startBtn = h('button', {class: 'btn primary big', onclick: startScan}, 'Scan QR code')
 
   const el = h('div', {class: 'pair-screen'},
-    h('h1', null, 'Pair this kitchen'),
-    h('label', {class: 'field'}, h('span', null, 'Kitchen name'), nameInput),
+    h('h1', null, state.role === 'taker' ? 'Pair this order taker' : 'Pair this kitchen'),
+    h('label', {class: 'field'}, h('span', null, state.role === 'taker' ? 'Device name' : 'Kitchen name'), nameInput),
     h('div', {class: 'pair-cols'},
       h('section', {class: 'panel'}, h('h2', null, 'Scan'), scanBox, status, startBtn),
       h('form', {class: 'panel', onsubmit: e => {
@@ -43,7 +43,7 @@ export function pairView({prefill} = {}) {
       return false
     }
     stop()
-    await pairKitchen(parsed, nameInput.value.trim() || 'Kitchen')
+    await pairKitchen(parsed, nameInput.value.trim() || ROLE_LABEL[state.role])
     toast('Paired. Waiting for the head device…')
     return true
   }

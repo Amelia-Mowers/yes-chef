@@ -35,6 +35,14 @@ The Cloudflare job needs the repository secrets `CLOUDFLARE_ACCOUNT_ID` and `CLO
 
 Browser data (IndexedDB) belongs to one address, so moving address means Export everything on the old one and Import on the new.
 
+## Roles
+
+- **Head**: takes orders, owns the menu, settings and the event log. One per restaurant (the paid device).
+- **Kitchen**: shows tickets and marks them Started / Done / Picked up.
+- **Order taker**: a second ordering screen. Orders, changes and undos go to the head as requests; the head numbers them and broadcasts. Orders queue while the head is offline.
+
+Kitchens and order takers pair the same way (QR or typed code from the head's Settings), and any number can join.
+
 ## Plates
 
 When adding an item, pick **No plate**, an existing plate, or **+ New plate** (the last plate used is preselected). Lines on the same plate are grouped under a plate heading on the head's ticket, the kitchen card and the order's History detail; unplated lines come first. Each ticket line has a plate button to move it. Plates renumber themselves (Plate 1, 2, …) when one empties, and moving an item between plates shows up in the kitchen's “CHANGED” list.

@@ -189,6 +189,43 @@ try {
     await shot(kit, '14-plates-kitchen')
   })
 
+  await step('an order taker pairs, sends through the head, and can undo', async () => {
+    const takerCtx = await browser.newContext({viewport})
+    const taker = await takerCtx.newPage()
+    taker.on('pageerror', e => console.log('[taker error]', e.message))
+    try {
+      await head.locator('.tabs button', {hasText: 'Settings'}).click()
+      const code = (await head.locator('.code').textContent()).trim()
+      await taker.goto(URL)
+      await taker.getByRole('button', {name: /Order taker/}).click()
+      await taker.getByText('Pair this order taker').waitFor()
+      await taker.getByLabel('Device name').fill('Front 2')
+      await taker.getByLabel('Pairing code').fill(code)
+      await taker.getByRole('button', {name: 'Pair', exact: true}).click()
+      await taker.locator('.badge.ok').waitFor({timeout: 60000})
+      await head.locator('li', {hasText: 'Front 2 · order taker'}).waitFor({timeout: 30000})
+      await taker.locator('.cat-btn', {hasText: 'Desserts'}).waitFor({timeout: 15000}) // menu arrived from the head
+      await taker.locator('.cat-btn', {hasText: 'Desserts'}).click()
+      await taker.locator('.item-btn', {hasText: 'Apple Pie'}).click()
+      await taker.getByRole('button', {name: 'Add 1 to ticket'}).click()
+      await taker.getByLabel('Order name').fill('From taker')
+      await taker.locator('.send').click()
+      const sent = taker.locator('.toast', {hasText: /Order #\d+ sent/})
+      await sent.waitFor({timeout: 15000})
+      const number = (await sent.textContent()).match(/#(\d+)/)[1]
+      const card = kit.locator('.card', {hasText: 'From taker'})
+      await card.waitFor({timeout: 15000})
+      assert((await card.locator('.card-num').textContent()) === `#${number}`, 'kitchen shows the number the head assigned')
+      await shot(taker, '16-taker')
+      await sent.getByRole('button', {name: 'Undo'}).click()
+      await card.waitFor({state: 'detached', timeout: 15000})
+      await head.locator('.tabs button', {hasText: 'History'}).click()
+      await head.locator('.hist-row.undone', {hasText: 'From taker'}).waitFor({timeout: 15000})
+    } finally {
+      await takerCtx.close()
+    }
+  })
+
   await step('a new deploy shows the reload banner, and reload picks it up', async () => {
     // Serve an assembled copy, then change its version like a deploy would.
     const root = mkdtempSync(join(tmpdir(), 'yes-chef-site-'))
