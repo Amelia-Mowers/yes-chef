@@ -5,7 +5,7 @@ set -euo pipefail
 out="${1:-_site}"
 build="${BUILD:-$(git rev-parse --short=7 HEAD)}"
 rm -rf "$out" && mkdir -p "$out"
-cp -r index.html manifest.webmanifest sw.js css js vendor icons _headers "$out"/
+cp -r index.html manifest.webmanifest sw.js css js vendor icons _headers .well-known "$out"/
 sed -i "s/^const VERSION = .*/const VERSION = 'yes-chef-$build'/" "$out/sw.js"
 sed -i "s/^export const BUILD = .*/export const BUILD = '$build'/" "$out/js/version.js"
 grep -q "yes-chef-$build" "$out/sw.js" && grep -q "'$build'" "$out/js/version.js"

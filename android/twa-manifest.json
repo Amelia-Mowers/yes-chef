@@ -1,0 +1,32 @@
+{
+  "packageId": "win.yeschef.app",
+  "host": "app.yes-chef.win",
+  "name": "Yes Chef",
+  "launcherName": "Yes Chef",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#1F1B16",
+  "themeColorDark": "#17140F",
+  "navigationColor": "#1F1B16",
+  "navigationColorDark": "#17140F",
+  "navigationDividerColor": "#00000000",
+  "navigationDividerColorDark": "#00000000",
+  "backgroundColor": "#F6F2EC",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://app.yes-chef.win/icons/icon-512.png",
+  "maskableIconUrl": "https://app.yes-chef.win/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {"path": "./upload.keystore", "alias": "upload"},
+  "appVersionCode": 1,
+  "appVersion": "0.1.0",
+  "shortcuts": [],
+  "webManifestUrl": "https://app.yes-chef.win/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {"enabled": true}
+  },
+  "enableSiteSettingsShortcut": false,
+  "minSdkVersion": 24,
+  "generatorApp": "yes-chef tools/android.mjs"
+}

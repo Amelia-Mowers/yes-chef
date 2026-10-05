@@ -8,3 +8,5 @@ test/shots/
 .env*
 !.env.example
 _site/
+android/build-project/
+*.keystore

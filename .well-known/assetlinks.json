@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "win.yeschef.app",
+      "sha256_cert_fingerprints": [
+        "6B:5E:9E:45:07:39:AE:1E:92:0A:F2:A4:72:32:B7:5F:8C:87:D8:7A:4D:E8:85:4B:93:E9:35:19:40:B4:8B:BB"
+      ]
+    }
+  }
+]

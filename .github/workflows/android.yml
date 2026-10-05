@@ -1,0 +1,74 @@
+name: Android app
+
+# Builds the Trusted Web Activity (android/twa-manifest.json) and signs it with
+# the upload key. Run by hand (Actions → Android app → Run workflow) or by
+# pushing a tag like android-v0.1.0. Play App Signing re-signs it for users.
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Version code (must increase with every Play upload)
+        required: true
+        default: '1'
+      version_name:
+        description: Version name shown to users
+        required: true
+        default: '0.1.0'
+  push:
+    tags: ['android-v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v4
+      - name: Version
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            name="${GITHUB_REF_NAME#android-v}"
+            code="${{ github.run_number }}"
+          else
+            name="${{ inputs.version_name }}"
+            code="${{ inputs.version_code }}"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+      - name: Generate project
+        run: node tools/android.mjs "${{ steps.v.outputs.code }}" "${{ steps.v.outputs.name }}"
+      - name: Build
+        working-directory: android/build-project
+        run: ./gradlew --no-daemon bundleRelease assembleRelease
+      - name: Sign
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > upload.keystore
+          out=dist && mkdir -p $out
+          aab=$(ls android/build-project/app/build/outputs/bundle/release/*.aab | head -1)
+          jarsigner -keystore upload.keystore -storepass "$KEYSTORE_PASSWORD" -keypass "$KEYSTORE_PASSWORD" -signedjar "$out/yes-chef-${{ steps.v.outputs.name }}.aab" "$aab" upload
+          apk=$(ls android/build-project/app/build/outputs/apk/release/*-unsigned.apk | head -1)
+          tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$tools/zipalign" -f -p 4 "$apk" aligned.apk
+          "$tools/apksigner" sign --ks upload.keystore --ks-pass env:KEYSTORE_PASSWORD --ks-key-alias upload --out "$out/yes-chef-${{ steps.v.outputs.name }}.apk" aligned.apk
+          "$tools/apksigner" verify --print-certs "$out/yes-chef-${{ steps.v.outputs.name }}.apk" | grep -i 'SHA-256'
+          rm upload.keystore aligned.apk
+      - uses: actions/upload-artifact@v7
+        with:
+          name: yes-chef-android-${{ steps.v.outputs.name }}-${{ steps.v.outputs.code }}
+          path: dist/

@@ -11,6 +11,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@bubblewrap/core": "^1.25.0",
     "@trystero-p2p/ws-relay": "^0.26.0",
     "esbuild": "^0.28.2",
     "jsqr": "^1.4.0",
