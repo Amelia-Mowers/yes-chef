@@ -16,7 +16,7 @@ Last updated 2026-10-05.
 | 6 | Play Billing | Not started |
 | 7 | Play Store setup and closed test | Not started |
 | 8 | Launch | Not started |
-| — | Pricing | Proposed, not decided |
+| — | Pricing | **Decided**: $19/mo or $190/yr, 30-day trial |
 
 Already shipped along the way: plates, reload-on-update banner, Sheffield (menu via your own chat assistant), marketing site, CI that tests then deploys to Cloudflare.
 
@@ -69,7 +69,7 @@ One Cloudflare Worker with D1 (database) and R2 (file storage).
 
 ## 6. Play Billing
 
-- [ ] Play Console: one subscription product, base plans (monthly, yearly), free-trial offer, founding-price offer if used.
+- [ ] Play Console: one subscription product, base plans $19/month and $190/year, 30-day free-trial offer.
 - [ ] App: Digital Goods API + Payment Request API inside the TWA; send purchase token to the licensing server.
 - [ ] License testers for development; restore purchases.
 - [ ] Note: Google takes 15% on subscriptions and is merchant of record (handles tax). Check current US/regional rules on outside payment links before relying on them.
@@ -85,14 +85,14 @@ One Cloudflare Worker with D1 (database) and R2 (file storage).
 ## 8. Launch
 
 - [ ] Staged rollout, support email, refund policy, simple status page.
-- [ ] Update the marketing site with pricing and a Play Store badge.
+- [ ] Update the marketing site with pricing ($19/month or $190/year, 30-day free trial) and a Play Store badge.
 
-## Pricing (proposed, not decided)
+## Pricing (decided 2026-10-05)
 
-- **$19/month or $190/year per head**, 30-day free trial, unlimited kitchens and order takers.
-- **Founding price $12/month locked for life** for early customers.
-- Option: **free plan** with one head + one kitchen; paid unlocks unlimited devices and remote backups.
-- Reasoning: Square KDS is about $20–30 per kitchen screen per month (or bundled in $49–60+/month plans); Yes Chef is cheaper from the second screen on. Google's 15% cut leaves ~$16 of $19. Yes Chef doesn't take payments, so the market is small places with a basic till: cafés, food trucks, pop-ups.
+- **$19/month or $190/year per head device**, unlimited kitchens and order takers.
+- **30-day free trial.** No free plan, no founding price.
+- Play Console: one subscription product with two base plans (monthly $19, yearly $190) and a 30-day free-trial offer on both.
+- Context: Square KDS is about $20–30 per kitchen screen per month (or bundled in $49–60+/month plans), so Yes Chef is cheaper from the second screen on. After Google's 15% cut, $19 nets about $16.
 
 ## Later
 
