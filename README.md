@@ -22,7 +22,7 @@ Camera access for the QR scanner and service workers need HTTPS (or `localhost`)
 
 ## Deploy
 
-Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass, the app files (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`) are published to GitHub Pages. Pull requests run the tests without deploying. Every path is relative, so the same files work from `/yes-chef/` and later from a root domain on Cloudflare Pages. Bump `VERSION` in `sw.js` when you ship changes so tablets pick them up.
+Every push to `main` runs `.github/workflows/deploy.yml`: unit tests, then the head + kitchen end-to-end test in Chromium. If both pass, the app files (`index.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `vendor/`, `icons/`) are published to GitHub Pages. Pull requests run the tests without deploying. The workflow stamps each deploy with its commit id (`VERSION` in `sw.js`, `BUILD` in `js/version.js`), so every deploy installs on tablets as a new version: the app checks when it returns to the foreground and every 30 minutes, then shows a **Reload** banner (Settings → App version also has **Check for updates**). It never reloads by itself; an unsent ticket on the head survives a reload. Every path is relative, so the same files work from `/yes-chef/` and later from a root domain on Cloudflare Pages.
 
 Moving domains does not move data (IndexedDB is per origin): export everything from Settings on the old domain and import it on the new one.
 
@@ -41,6 +41,10 @@ Moving domains does not move data (IndexedDB is per origin): export everything f
 ## How sync works
 
 The head owns the log and assigns every `seq`. A kitchen sends an *intent* (with an ID) → the head stamps it as an event, saves it, and broadcasts it to all kitchens. Kitchens resend queued intents every 3 s until the matching event arrives; the head ignores duplicates. On (re)connect a kitchen sends `hello {lastSeq, epoch}` and gets everything after `lastSeq`, or the full log if the head's log was cleared or replaced (new `epoch`).
+
+## Plates
+
+When adding an item, pick **No plate**, an existing plate, or **+ New plate** (the last plate used is preselected). Lines on the same plate are grouped under a plate heading on the head's ticket, the kitchen card and the order's History detail; unplated lines come first. Each ticket line has a plate button to move it. Plates renumber themselves (Plate 1, 2, …) when one empties, and moving an item between plates shows up in the kitchen's “CHANGED” list.
 
 ## Sheffield, the menu butler
 

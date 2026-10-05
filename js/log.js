@@ -136,6 +136,37 @@ export function recallTarget(events, settings) {
   return null
 }
 
+// ---------- plates ----------
+// A line may sit on a numbered plate (line.plate = 1, 2, …) or on none (null).
+
+export const plateLabel = n => `Plate ${n}`
+
+export function platesOf(lines) {
+  return [...new Set(lines.map(l => l.plate).filter(n => n != null))].sort((a, b) => a - b)
+}
+
+// Groups for display: unplated lines first, then each plate in order.
+// Each entry keeps the line's index in the original array.
+export function groupByPlate(lines) {
+  const groups = new Map()
+  lines.forEach((line, index) => {
+    const key = line.plate ?? null
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push({line, index})
+  })
+  return [...groups.entries()]
+    .sort(([a], [b]) => (a == null ? -1 : b == null ? 1 : a - b))
+    .map(([plate, entries]) => ({plate, entries}))
+}
+
+// Renumbers plates 1..n in their current order, so emptying Plate 1 doesn't
+// leave the kitchen looking at a lone "Plate 2".
+export function compactPlates(lines) {
+  const map = new Map(platesOf(lines).map((p, i) => [p, i + 1]))
+  for (const l of lines) if (l.plate != null) l.plate = map.get(l.plate)
+  return lines
+}
+
 export function lineText(line) {
   const mods = line.modifiers?.length ? ` (${line.modifiers.join(', ')})` : ''
   return `${line.qty}× ${line.itemName}${mods}`
@@ -143,7 +174,8 @@ export function lineText(line) {
 
 // Human-readable changes between two sets of order lines.
 export function diffLines(before, after, nameBefore, nameAfter) {
-  const key = l => `${l.itemName}|${(l.modifiers || []).join(',')}|${l.note || ''}`
+  const key = l => `${l.itemName}|${(l.modifiers || []).join(',')}|${l.note || ''}|${l.plate ?? ''}`
+  const onPlate = l => (l.plate != null ? ` on ${plateLabel(l.plate)}` : '')
   const count = lines => {
     const m = new Map()
     for (const l of lines) m.set(key(l), {line: l, qty: (m.get(key(l))?.qty || 0) + l.qty})
@@ -154,11 +186,11 @@ export function diffLines(before, after, nameBefore, nameAfter) {
   const changes = []
   for (const [k, {line, qty}] of b) {
     const prev = a.get(k)?.qty || 0
-    if (qty > prev) changes.push(`+ ${lineText({...line, qty: qty - prev})}`)
+    if (qty > prev) changes.push(`+ ${lineText({...line, qty: qty - prev})}${onPlate(line)}`)
   }
   for (const [k, {line, qty}] of a) {
     const next = b.get(k)?.qty || 0
-    if (qty > next) changes.push(`− ${lineText({...line, qty: qty - next})}`)
+    if (qty > next) changes.push(`− ${lineText({...line, qty: qty - next})}${onPlate(line)}`)
   }
   if ((nameBefore || '') !== (nameAfter || '')) changes.push(`Name: ${nameAfter || '(none)'}`)
   return changes

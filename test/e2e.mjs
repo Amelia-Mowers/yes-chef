@@ -2,7 +2,9 @@
 // Needs internet (Trystero signals through public Nostr relays). Run: node test/e2e.mjs
 import {chromium} from 'playwright'
 import {spawn} from 'node:child_process'
-import {mkdirSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, cpSync, readFileSync, writeFileSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
 import assert from 'node:assert/strict'
 
 const OUT = process.env.SHOTS || 'test/shots'
@@ -158,6 +160,65 @@ try {
     await head.locator('.edit-list li', {hasText: 'Onion Rings'}).waitFor({state: 'attached'}).catch(() => {})
     await head.locator('.edit-list li', {hasText: 'Burgers'}).waitFor()
     await head.getByText('Unpublished changes').waitFor()
+  })
+
+  await step('plates group items on the head ticket and the kitchen card', async () => {
+    await head.keyboard.press('Escape')
+    await head.locator('.tabs button', {hasText: 'Order'}).click()
+    await head.locator('.cat-btn', {hasText: 'Burgers'}).click()
+    await head.locator('.item-btn', {hasText: 'Veggie Burger'}).click()
+    await head.locator('.chip', {hasText: '+ New plate'}).click()
+    await head.getByRole('button', {name: 'Add 1 to ticket'}).click()
+    await head.locator('.cat-btn', {hasText: 'Sides'}).click()
+    await head.locator('.item-btn', {hasText: 'Onion Rings'}).click()
+    await head.locator('.chip', {hasText: 'Regular'}).click()
+    await head.locator('.chip.on', {hasText: 'Plate 1'}).waitFor() // remembers the last plate
+    await head.getByRole('button', {name: 'Add 1 to ticket'}).click()
+    await head.locator('.cat-btn', {hasText: 'Drinks'}).click()
+    await head.locator('.item-btn', {hasText: 'Water'}).click()
+    await head.locator('.chip', {hasText: 'No plate'}).click()
+    await head.getByRole('button', {name: 'Add 1 to ticket'}).click()
+    await head.getByLabel('Order name').fill('Plates')
+    await head.locator('.ticket .plate-head', {hasText: 'Plate 1'}).waitFor()
+    await shot(head, '13-plates-ticket')
+    await head.locator('.send').click()
+    const card = kit.locator('.card', {hasText: 'Plates'})
+    await card.waitFor({timeout: 15000})
+    const rows = await card.locator('.card-lines > li').allInnerTexts()
+    assert.deepEqual(rows.map(r => r.replace(/\s+/g, ' ').trim()), ['1 Water', 'PLATE 1', '1 Veggie Burger', '1 Onion Rings Regular'])
+    await shot(kit, '14-plates-kitchen')
+  })
+
+  await step('a new deploy shows the reload banner, and reload picks it up', async () => {
+    // Serve an assembled copy, then change its version like a deploy would.
+    const root = mkdtempSync(join(tmpdir(), 'yes-chef-site-'))
+    for (const f of ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'vendor', 'icons']) cpSync(f, join(root, f), {recursive: true})
+    const stamp = build => {
+      writeFileSync(join(root, 'sw.js'), readFileSync('sw.js', 'utf8').replace(/^const VERSION = .*/m, `const VERSION = 'yes-chef-${build}'`))
+      writeFileSync(join(root, 'js/version.js'), `export const BUILD = '${build}'\n`)
+    }
+    stamp('aaaaaaa')
+    const site = spawn('node', ['tools/serve.mjs'], {env: {...process.env, PORT: '8092', ROOT: root + '/'}, stdio: 'ignore'})
+    await new Promise(r => setTimeout(r, 500))
+    const ctx = await browser.newContext({viewport})
+    const p = await ctx.newPage()
+    try {
+      await p.goto('http://localhost:8092/yes-chef/')
+      await p.getByRole('button', {name: /Head/}).click()
+      await p.evaluate(() => navigator.serviceWorker.ready)
+      await p.locator('.tabs button', {hasText: 'Settings'}).click()
+      await p.getByText('Yes Chef aaaaaaa').waitFor()
+      stamp('bbbbbbb')
+      await p.getByRole('button', {name: 'Check for updates'}).click()
+      await p.locator('.update-banner').waitFor({timeout: 15000})
+      await shot(p, '15-update-banner')
+      await p.locator('.update-banner').getByRole('button', {name: 'Reload'}).click()
+      await p.locator('.tabs button', {hasText: 'Settings'}).click()
+      await p.getByText('Yes Chef bbbbbbb').waitFor()
+    } finally {
+      await ctx.close()
+      site.kill()
+    }
   })
 
   console.log('\nAll steps passed.')

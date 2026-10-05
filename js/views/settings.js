@@ -7,6 +7,8 @@ import {DEFAULT_SETTINGS} from '../log.js'
 import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
 import {THEMES, getTheme, setTheme} from '../theme.js'
+import {BUILD} from '../version.js'
+import {checkForUpdate} from '../update.js'
 
 function qrSvg(text) {
   const qr = qrcode(0, 'M')
@@ -40,6 +42,25 @@ function screenSection() {
       await setLocal({wakeLock: v})
       applyWakeLock()
     }, 'Stops the tablet sleeping and dropping the connection.')
+  )
+}
+
+function aboutSection() {
+  return h('section', {class: 'panel'},
+    h('h2', null, 'App version'),
+    h('p', {class: 'muted'}, `Yes Chef ${BUILD}. New versions install in the background; you'll be offered a reload.`),
+    h('button', {class: 'btn', onclick: async e => {
+      const btn = e.currentTarget
+      btn.disabled = true
+      try {
+        const found = await checkForUpdate()
+        toast(found ? 'Downloading the new version…' : 'You’re on the latest version.')
+      } catch {
+        toast('Couldn’t check for updates. Are you online?')
+      } finally {
+        btn.disabled = false
+      }
+    }}, 'Check for updates')
   )
 }
 
@@ -119,6 +140,7 @@ export function settingsView() {
         )
       ),
       screenSection(),
+      aboutSection(),
       roleSection()
     )
   }
@@ -144,6 +166,7 @@ export function settingsView() {
         }}, 'Unpair')
       ),
       screenSection(),
+      aboutSection(),
       roleSection()
     )
   }

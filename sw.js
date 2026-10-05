@@ -1,5 +1,6 @@
-// Offline app shell. Bump VERSION whenever any shell file changes.
-const VERSION = 'yes-chef-v3'
+// Offline app shell. The deploy workflow replaces VERSION with the commit id,
+// so every deploy installs as a new version.
+const VERSION = 'yes-chef-v4'
 const SHELL = [
   './',
   'index.html',
@@ -12,6 +13,8 @@ const SHELL = [
   'js/net.js',
   'js/ui.js',
   'js/wake.js',
+  'js/update.js',
+  'js/version.js',
   'js/theme.js',
   'js/sample-menu.js',
   'js/views/order.js',

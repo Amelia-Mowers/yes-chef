@@ -2,7 +2,7 @@
 
 import {h, clear, toast, age} from '../ui.js'
 import {state, kitchenSetStatus, recall, dismissTicket} from '../store.js'
-import {enabledStatuses, isOpen, STATUS_ORDER, STATUS_LABEL} from '../log.js'
+import {enabledStatuses, isOpen, STATUS_ORDER, STATUS_LABEL, groupByPlate, plateLabel} from '../log.js'
 
 const CANCEL_VISIBLE_MS = 2 * 60 * 60 * 1000
 
@@ -69,16 +69,19 @@ export function kitchenView() {
         ),
         o.status !== 'new' && !o.cancelled && h('div', {class: 'status-tag s-' + o.status}, STATUS_LABEL[o.status]),
         h('ul', {class: 'card-lines'},
-          o.lines.map(l =>
-            h('li', {style: {'--cat': l.color || 'transparent'}},
-              h('span', {class: 'card-qty'}, l.qty),
-              h('div', null,
-                h('div', {class: 'card-item'}, l.itemName),
-                l.modifiers?.length > 0 && h('div', {class: 'card-mods'}, l.modifiers.join(' · ')),
-                l.note && h('div', {class: 'card-note'}, l.note)
+          groupByPlate(o.lines).map(({plate, entries}) => [
+            plate != null && h('li', {class: 'plate-head'}, plateLabel(plate)),
+            entries.map(({line: l}) =>
+              h('li', {class: plate != null ? 'plated' : null, style: {'--cat': l.color || 'transparent'}},
+                h('span', {class: 'card-qty'}, l.qty),
+                h('div', null,
+                  h('div', {class: 'card-item'}, l.itemName),
+                  l.modifiers?.length > 0 && h('div', {class: 'card-mods'}, l.modifiers.join(' · ')),
+                  l.note && h('div', {class: 'card-note'}, l.note)
+                )
               )
             )
-          )
+          ])
         ),
         h('footer', {class: 'card-actions'},
           o.cancelled

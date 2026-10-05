@@ -2,7 +2,7 @@
 
 import {h, clear, sheet, sheetHeader, confirmDialog, toast, clock, dayLabel} from '../ui.js'
 import {state, subscribe, undoEvent, cancelOrder, headSetStatus, kitchenSetStatus} from '../store.js'
-import {STATUS_LABEL, UNDOABLE, describeEvent, enabledStatuses, lineText} from '../log.js'
+import {STATUS_LABEL, UNDOABLE, describeEvent, enabledStatuses, lineText, groupByPlate, plateLabel} from '../log.js'
 import {startEditing} from './order.js'
 
 const filters = {status: 'all', time: 'today', name: '', mode: 'orders'}
@@ -147,7 +147,10 @@ export function historyView({go}) {
 
       return h('div', null,
         sheetHeader(`Order #${o.number}${o.name ? ' · ' + o.name : ''}`, close, h('span', {class: `pill s-${orderStatus(o)}`}, statusText(o))),
-        h('ul', {class: 'detail-lines'}, o.lines.map(l => h('li', null, lineText(l), l.note && h('span', {class: 'line-note'}, ` “${l.note}”`)))),
+        groupByPlate(o.lines).map(({plate, entries}) => [
+          plate != null && h('h4', {class: 'plate-head'}, plateLabel(plate)),
+          h('ul', {class: 'detail-lines'}, entries.map(({line: l}) => h('li', null, lineText(l), l.note && h('span', {class: 'line-note'}, ` “${l.note}”`))))
+        ]),
         active && h('div', {class: 'row gap wrap'},
           isHead && h('button', {class: 'btn primary', onclick: () => {
             startEditing(o)

@@ -5,6 +5,7 @@ import {state, boot, subscribe, chooseRole, pairKitchen, setHooks} from './store
 import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
+import {registerServiceWorker} from './update.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
 import {historyView} from './views/history.js'
@@ -135,9 +136,7 @@ async function start() {
   render()
 }
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker failed', err))
-}
+registerServiceWorker()
 
 start().catch(err => {
   console.error(err)

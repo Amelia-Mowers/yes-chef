@@ -75,3 +75,23 @@ test('diffLines lists additions, removals, and name change', () => {
   const changes = diffLines([line('Burger', 2, ['Medium rare'])], [line('Burger', 1, ['Medium rare']), line('Fries')], 'Sam', 'Sam B')
   assert.deepEqual(changes, ['+ 1× Fries', '− 1× Burger (Medium rare)', 'Name: Sam B'])
 })
+
+test('plates group, compact, and show in change lists', async () => {
+  const {groupByPlate, compactPlates, platesOf} = await import('../js/log.js')
+  const lines = [
+    {...line('Burger'), plate: 2},
+    {...line('Water')},
+    {...line('Fries'), plate: 2},
+    {...line('Salad'), plate: 3}
+  ]
+  assert.deepEqual(groupByPlate(lines).map(g => [g.plate, g.entries.map(e => e.line.itemName)]), [
+    [null, ['Water']],
+    [2, ['Burger', 'Fries']],
+    [3, ['Salad']]
+  ])
+  compactPlates(lines)
+  assert.deepEqual(platesOf(lines), [1, 2])
+  assert.deepEqual(lines.map(l => l.plate ?? null), [1, null, 1, 2])
+  const moved = lines.map(l => (l.itemName === 'Fries' ? {...l, plate: 2} : l))
+  assert.deepEqual(diffLines(lines, moved, '', ''), ['+ 1× Fries on Plate 2', '− 1× Fries on Plate 1'])
+})
