@@ -23,8 +23,8 @@ Play only lets you create subscriptions after a build with billing is uploaded, 
 4. **Create the subscriptions** (Monetize with Play → Products → Subscriptions)
    | Product ID | Name | Base plan ID | Billing | Price | Offer |
    |---|---|---|---|---|---|
-   | `yes_chef_monthly` | Yes Chef Monthly | `monthly` | Auto-renewing, 1 month | $19.00 USD | Free trial, 30 days, new customers |
-   | `yes_chef_yearly` | Yes Chef Yearly | `yearly` | Auto-renewing, 1 year | $190.00 USD | Free trial, 30 days, new customers |
+   | `yes_chef_monthly` | Yes Chef Monthly | `monthly` | Auto-renewing, 1 month | $18.99 USD | Free trial, 30 days, new customers |
+   | `yes_chef_yearly` | Yes Chef Yearly | `yearly` | Auto-renewing, 1 year | $189.99 USD | Free trial, 30 days, new customers |
    - Let Play convert prices for other countries (adjust later if you like).
    - Activate both base plans and both offers.
 
@@ -92,7 +92,7 @@ MENU IN MINUTES
 • Build the menu on the tablet, or let Sheffield, your menu butler, turn a photo of your menu into a ready-made menu using the chat assistant you already use
 
 PRICING
-One subscription per head tablet: $19/month or $190/year, with a 30-day free trial. Kitchen and order-taker tablets are always free. Cancel anytime in Google Play.
+One subscription per head tablet: $18.99/month or $189.99/year, with a 30-day free trial. Kitchen and order-taker tablets are always free. Cancel anytime in Google Play.
 
 Yes Chef routes orders; it doesn't take payments, so it works alongside the till you already have.
 ```

@@ -3,16 +3,16 @@
 // available and the head stays free (early access).
 //
 // Play Console products (subscriptions, each with a 30-day free-trial offer):
-//   yes_chef_monthly  $19 / month
-//   yes_chef_yearly   $190 / year
+//   yes_chef_monthly  $18.99 / month
+//   yes_chef_yearly   $189.99 / year
 
 import {activateLicense} from './license.js'
 export {inAndroidApp} from './platform.js'
 
 export const PLAY_BILLING = 'https://play.google.com/billing'
 export const PRODUCTS = [
-  {id: 'yes_chef_monthly', label: 'Monthly', fallbackPrice: '$19 / month'},
-  {id: 'yes_chef_yearly', label: 'Yearly', fallbackPrice: '$190 / year', note: 'two months free'}
+  {id: 'yes_chef_monthly', label: 'Monthly', fallbackPrice: '$18.99 / month'},
+  {id: 'yes_chef_yearly', label: 'Yearly', fallbackPrice: '$189.99 / year', note: 'two months free'}
 ]
 let servicePromise = null
 export function billingService() {

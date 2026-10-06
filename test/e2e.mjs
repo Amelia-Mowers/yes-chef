@@ -323,7 +323,7 @@ try {
     const fakePlay = token => {
       localStorage.setItem('yes-chef-android-app', '1')
       window.getDigitalGoodsService = async () => ({
-        getDetails: async ids => ids.map(itemId => ({itemId, price: {currency: 'USD', value: itemId.includes('yearly') ? '190' : '19'}, freeTrialPeriod: 'P30D'})),
+        getDetails: async ids => ids.map(itemId => ({itemId, price: {currency: 'USD', value: itemId.includes('yearly') ? '189.99' : '18.99'}, freeTrialPeriod: 'P30D'})),
         listPurchases: async () => [{itemId: 'yes_chef_monthly', purchaseToken: token}]
       })
       window.PaymentRequest = class {
@@ -343,7 +343,7 @@ try {
         await p.getByRole('button', {name: /Head/}).click()
         await p.getByRole('heading', {name: 'Start your 30-day free trial'}).waitFor()
         if (i === 0) {
-          await p.locator('.plan', {hasText: '$190.00 / year'}).waitFor()
+          await p.locator('.plan', {hasText: '$189.99 / year'}).waitFor()
           await shot(p, '18-paywall')
           await p.locator('.plan', {hasText: 'Monthly'}).click()
           await p.getByText('Subscription active').first().waitFor()
