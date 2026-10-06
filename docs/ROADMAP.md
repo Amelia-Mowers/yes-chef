@@ -60,7 +60,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 
 **Remote backups** (paid feature):
 - [x] Encrypted per account (AES-GCM, keys derived from the `BACKUP_MASTER_KEY` Worker secret), not end-to-end, so a new head on the same account can restore after losing every device. Newest 60 kept.
-- [x] Automatic daily backup plus one before each publish/import/history clear; Back up now; Restore from cloud.
+- [x] **Opt-in**: a licensed head asks once ("Back up to the cloud?"); switch in Settings → Subscription. When on: daily backup plus one before each publish/import/history clear; Back up now. Restore from cloud and Delete my cloud data always available.
 - [x] Only the bound head can read or write; a moved/old head is refused.
 - [x] **Never back up Sheffield conversations**: the server keeps only menu, settings and events, whatever the client sends.
 

@@ -51,7 +51,7 @@ When adding an item, pick **No plate**, an existing plate, or **+ New plate** (t
 
 ## Privacy switches
 
-Settings → Privacy has two per-device switches, **Crash and error reports** and **Usage analytics**, both off by default. Nothing is collected today; any future reporting must go through `js/telemetry.js`, which checks them.
+Cloud backup is opt-in too: a licensed head asks once ("Back up to the cloud?") and Settings → Subscription has the switch; nothing uploads until it's on. Settings → Privacy has two per-device switches, **Crash and error reports** and **Usage analytics**, both off by default. Nothing is collected today; any future reporting must go through `js/telemetry.js`, which checks them.
 
 ## Sheffield, the menu butler
 

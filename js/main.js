@@ -12,7 +12,8 @@ import {inAndroidApp} from './platform.js'
 import {announceMove} from './moved.js'
 import {loadLicense, activateLicense, isLicensed, ENFORCE, onLicense, licenseStatus} from './license.js'
 import {subscribeView} from './views/subscribe.js'
-import {autoBackup, backupNow} from './cloud.js'
+import {autoBackup, backupNow, cloudBackupChoice, cloudBackupEnabled, setCloudBackup} from './cloud.js'
+import {confirmDialog} from './ui.js'
 import {orderView} from './views/order.js'
 import {kitchenView} from './views/kitchen.js'
 import {historyView} from './views/history.js'
@@ -168,6 +169,22 @@ function renderPairChoice() {
   )
 }
 
+// Asked once, on a licensed head, before anything is uploaded.
+let askingBackup = false
+async function askAboutBackup() {
+  if (state.role !== 'head' || !isLicensed() || cloudBackupChoice() !== undefined || askingBackup) return
+  askingBackup = true
+  const on = await confirmDialog({
+    title: 'Back up to the cloud?',
+    message: 'Yes Chef can keep encrypted copies of your menu, settings and order history (including any names typed on tickets) on its servers, daily and before big changes, so you can restore everything on a new tablet. You can change this any time in Settings → Subscription.',
+    confirm: 'Turn on backups',
+    cancel: 'Not now'
+  })
+  await setCloudBackup(on === true)
+  askingBackup = false
+  if (on === true) backupNow('first').then(() => toast('Backed up to the cloud')).catch(() => {})
+}
+
 function readPairingHash() {
   const parsed = parsePairing(location.hash)
   if (!parsed) return null
@@ -179,7 +196,7 @@ async function start() {
   applyTheme()
   setHooks({
     toast: msg => toast(msg),
-    snapshot: reason => isLicensed() && backupNow(reason.toLowerCase()).catch(() => {})
+    snapshot: reason => isLicensed() && cloudBackupEnabled() && backupNow(reason.toLowerCase()).catch(() => {})
   })
   subscribe(render)
   await boot()
@@ -194,12 +211,13 @@ async function start() {
   }
   render()
   announceMove()
-  if (state.role === 'head') loadLicense().then(autoBackup)
+  if (state.role === 'head') loadLicense().then(askAboutBackup).then(autoBackup)
   // Swap the order screen and the subscription screen as the license changes.
   let licensed = isLicensed()
   onLicense(() => {
     if (isLicensed() !== licensed && state.role === 'head' && current?.key === 'order') go('order')
     licensed = isLicensed()
+    askAboutBackup()
     if (ENFORCE && licenseStatus() === 'grace') toast('Yes Chef couldn’t check your subscription lately. Connect to the internet within a few days to keep taking orders.', {duration: 8000})
   })
   // Local development only: lets tests activate a fake purchase.

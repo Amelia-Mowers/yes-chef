@@ -300,10 +300,14 @@ try {
     const result = await head.evaluate(() => window.__yesChef.activateLicense('test-active-77', {deviceName: 'Front tablet'}))
     assert(result.ok, 'activation succeeded: ' + JSON.stringify(result))
     await head.getByText('Subscription active. This tablet is the head.').waitFor()
+    await head.getByRole('heading', {name: 'Back up to the cloud?'}).waitFor() // asked once, before any upload
+    await head.getByRole('button', {name: 'Turn on backups'}).click()
+    await head.getByText('Backed up to the cloud').first().waitFor()
     await head.getByRole('button', {name: 'Back up now'}).click()
     await head.getByText('Backed up to the cloud').waitFor()
     await head.getByRole('button', {name: 'Restore from cloud'}).click()
-    await head.locator('.sheet li', {hasText: 'manual · from Front tablet'}).waitFor()
+    await head.locator('.sheet li', {hasText: 'first · from Front tablet'}).waitFor()
+    await head.locator('.sheet li', {hasText: 'manual · from Front tablet'}).first().waitFor()
     await shot(head, '17-cloud-restore')
     await head.locator('.sheet li').first().getByRole('button', {name: 'Restore'}).click()
     await head.getByRole('button', {name: 'Restore', exact: true}).last().click()
@@ -344,6 +348,11 @@ try {
           await p.locator('.plan', {hasText: 'Monthly'}).click()
           await p.getByText('Subscription active').first().waitFor()
           await p.locator('.order-screen').waitFor() // order screen unlocked
+          await p.getByRole('heading', {name: 'Back up to the cloud?'}).waitFor()
+          await p.getByRole('button', {name: 'Not now'}).click()
+          await p.locator('.tabs button', {hasText: 'Settings'}).click()
+          assert(!(await p.locator('.toggle', {hasText: 'Back up to the cloud'}).locator('input').isChecked()), 'Not now leaves backups off')
+          assert((await p.getByRole('button', {name: 'Back up now'}).count()) === 0, 'no uploads while off')
         } else {
           await p.getByRole('button', {name: 'Restore purchase'}).click()
           await p.getByText('Move the subscription to this tablet?').waitFor()

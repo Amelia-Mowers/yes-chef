@@ -137,8 +137,8 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
     |---|---|---|
     | Device or other IDs (random device identifier) | App functionality, Account management | Required for the head's subscription |
     | Financial info → Purchase history (Play purchase token, subscription status) | App functionality, Account management | Required for subscribers |
-    | App activity → Other user-generated content (menu, settings, order history in cloud backups) | App functionality | Subscribers only (automatic backups) |
-    | Personal info → Name (customer names typed on tickets, inside backups) | App functionality | Subscribers only |
+    | App activity → Other user-generated content (menu, settings, order history in cloud backups) | App functionality | **Optional** (subscribers choose; asked on first subscribe, switch in Settings) |
+    | Personal info → Name (customer names typed on tickets, inside backups) | App functionality | **Optional** (only with cloud backup on) |
   - Everything else (location, contacts, photos: the camera is only used locally to scan a QR code, messages, health, etc.): not collected.
 
 Not legal advice: review the privacy policy and these answers yourself before submitting.

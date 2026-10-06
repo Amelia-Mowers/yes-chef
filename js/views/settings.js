@@ -10,7 +10,7 @@ import {THEMES, getTheme, setTheme} from '../theme.js'
 import {BUILD} from '../version.js'
 import {KINDS, telemetryAllowed, setTelemetry} from '../telemetry.js'
 import {license, licenseStatus, onLicense, GRACE_MS, ENFORCE} from '../license.js'
-import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup, deleteCloudData} from '../cloud.js'
+import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup, deleteCloudData, cloudBackupEnabled, setCloudBackup} from '../cloud.js'
 import {checkForUpdate} from '../update.js'
 
 function qrSvg(text) {
@@ -71,9 +71,14 @@ function subscriptionSection() {
       if (st === 'grace') rows.push(h('p', {class: 'muted small'}, `Couldn’t reach Yes Chef recently. Everything keeps working offline until ${when(license.claims.exp + GRACE_MS)}.`))
       rows.push(
         h('h3', null, 'Cloud backup'),
-        h('p', {class: 'muted small'}, last ? `Last backup ${when(last)}. Backs up daily and before every publish or import.` : 'Backs up daily and before every publish or import.'),
+        toggle('Back up to the cloud', cloudBackupEnabled(), async v => {
+          await setCloudBackup(v)
+          if (v) backupNow('manual').then(() => toast('Backed up to the cloud')).catch(() => {})
+          fill()
+        }, 'Encrypted copies of the menu, settings and order history, daily and before every publish or import.'),
+        cloudBackupEnabled() && h('p', {class: 'muted small'}, last ? `Last backup ${when(last)}.` : 'No backup yet.'),
         h('div', {class: 'row gap wrap'},
-          h('button', {class: 'btn', onclick: async e => {
+          cloudBackupEnabled() && h('button', {class: 'btn', onclick: async e => {
             e.currentTarget.disabled = true
             try {
               await backupNow('manual')
@@ -285,7 +290,7 @@ export function settingsView() {
 
   // Re-render only when connection details change, so toggles don't flicker.
   let sig = ''
-  const signature = () => `${state.room}|${state.devices.size}|${[...state.devices.values()].map(k => k.name)}|${state.headPeer}|${state.events.length}`
+  const signature = () => `${state.room}|${state.devices.size}|${[...state.devices.values()].map(k => `${k.name}:${k.role}`)}|${state.headPeer}|${state.events.length}|${state.local?.cloudBackup}`
   sig = signature()
   return {
     el,

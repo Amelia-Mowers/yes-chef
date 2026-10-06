@@ -3,13 +3,19 @@
 // can restore after the old tablet is lost.
 
 import {kv} from './db.js'
-import {state, exportAll, importAll} from './store.js'
+import {state, exportAll, importAll, setLocal} from './store.js'
 import {API_URL, authHeader, isLicensed, forgetLicense, license} from './license.js'
 
 const DAY = 86400000
 
+// Cloud backup is opt-in per head tablet: undefined until asked, then true/false.
+export const cloudBackupChoice = () => state.local?.cloudBackup
+export const cloudBackupEnabled = () => state.local?.cloudBackup === true
+export const setCloudBackup = on => setLocal({cloudBackup: Boolean(on)})
+
 export async function backupNow(reason = 'manual') {
   if (!isLicensed()) throw new Error('Cloud backup needs a subscription')
+  if (!cloudBackupEnabled()) throw new Error('Cloud backup is turned off')
   const res = await fetch(`${API_URL}/v1/backups?reason=${encodeURIComponent(reason)}`, {
     method: 'POST',
     headers: {'content-type': 'application/json', ...authHeader()},
@@ -47,7 +53,7 @@ export async function deleteCloudData() {
 
 // Daily automatic backup while the head is open; failures retry next time.
 export async function autoBackup() {
-  if (state.role !== 'head' || !isLicensed()) return
+  if (state.role !== 'head' || !isLicensed() || !cloudBackupEnabled()) return
   const last = (await lastCloudBackup()) || 0
   if (Date.now() - last > DAY) await backupNow('daily').catch(() => {})
 }
