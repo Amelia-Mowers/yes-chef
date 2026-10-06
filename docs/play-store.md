@@ -60,7 +60,7 @@ Play only lets you create subscriptions after a build with billing is uploaded, 
 **Short description** (80 max):
 `Send orders from the counter to kitchen tablets in a tap, over your own Wi-Fi.`
 
-**Full description:**
+**Full description** (also in `docs/store/full-description.txt`; copy from that file so line breaks survive):
 
 ```
 Yes Chef turns your tablets into a simple kitchen order system. One tablet takes orders at the front; every kitchen screen gets the ticket instantly over your own Wi-Fi.
