@@ -97,8 +97,10 @@ One subscription per head tablet: $19/month or $190/year, with a 30-day free tri
 Yes Chef routes orders; it doesn't take payments, so it works alongside the till you already have.
 ```
 
-**Category:** Business · **Tags:** Business, Restaurant, Productivity (choose what Play offers)
-**Contact email:** support@yes-chef.win · **Website:** https://yes-chef.win · **Privacy policy:** https://yes-chef.win/privacy
+**Store settings** (Grow → Store presence → Store settings):
+- App category: App · Category **Business** · Tags: up to 5 from Play's list, closest to business management / point of sale / restaurant / productivity.
+- Contact details: email **support@yes-chef.win** (public; needs Email Routing set up), phone left blank (optional, public), website **https://yes-chef.win**.
+- Privacy policy: **https://yes-chef.win/privacy**
 
 **Graphics** (`docs/store/`):
 - App icon: `icon-512.png`
