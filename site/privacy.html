@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yes Chef · Privacy policy</title>
+  <meta name="description" content="How Yes Chef handles your data: orders stay on your tablets, and the little that reaches our servers is listed here.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    :root { --bg: #f6f2ec; --surface: #fff; --line: #ddd4c8; --text: #221d17; --muted: #6f6458; --accent: #d0603f; color-scheme: light; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #17140f; --surface: #221e18; --line: #3d362c; --text: #f3ede4; --muted: #a99d8e; --accent: #e9805f; color-scheme: dark; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .wrap { width: min(760px, 100% - 32px); margin: 0 auto; }
+    header { border-bottom: 1px solid var(--line); }
+    header .wrap { display: flex; align-items: center; gap: 10px; min-height: 64px; }
+    header a { display: flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; color: inherit; }
+    header img { width: 32px; height: 32px; }
+    main { padding: 32px 0 64px; }
+    h1 { font-size: 2rem; margin: 0 0 4px; }
+    h2 { font-size: 1.2rem; margin: 32px 0 8px; }
+    .updated { color: var(--muted); margin: 0 0 24px; }
+    .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; }
+    .summary ul { margin: 8px 0 0; padding-left: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; margin: 8px 0; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    @media (max-width: 600px) { table, thead, tbody, tr, th, td { display: block; } thead { display: none; } td { border: none; padding: 2px 0; } tr { border-bottom: 1px solid var(--line); padding: 8px 0; } td:first-child { font-weight: 700; } }
+    a { color: var(--accent); }
+    footer { border-top: 1px solid var(--line); padding: 24px 0; color: var(--muted); font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><a href="./"><img src="icon.svg" alt="">Yes Chef</a></div></header>
+  <main class="wrap">
+    <h1>Privacy policy</h1>
+    <p class="updated">Last updated 6 October 2026</p>
+
+    <div class="summary">
+      <strong>In short</strong>
+      <ul>
+        <li>Your orders, menus and history are stored on your own tablets and sent directly between them.</li>
+        <li>Our servers only help tablets find each other, check subscriptions, and keep encrypted backups for subscribers.</li>
+        <li>No ads, no analytics, no tracking, and we never sell data.</li>
+      </ul>
+    </div>
+
+    <h2>Who we are</h2>
+    <p>Yes Chef is a kitchen order app for restaurants, available at app.yes-chef.win and as an Android app. In this policy, “we” means the developer of Yes Chef. You can reach us at <a href="mailto:support@yes-chef.win">support@yes-chef.win</a>.</p>
+
+    <h2>Data that stays on your devices</h2>
+    <p>Everything you enter into Yes Chef is stored in your tablets’ browser storage: your menu, settings, orders (including any names or notes typed on a ticket) and order history. When tablets are paired, this data travels directly between them over your network, encrypted with a key that only your paired tablets have. It does not pass through our servers.</p>
+    <p>The camera is used only to scan a pairing QR code. The image is processed on the device and never stored or sent anywhere.</p>
+
+    <h2>Data our servers handle</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why</th><th>Kept</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Connection details while pairing (IP address, a room identifier, encrypted connection setup messages)</td>
+          <td>Our relay (relay.yes-chef.win) introduces your tablets so they can connect directly. If it can’t be reached, public relays on the Nostr network are used instead, which see the same kind of details.</td>
+          <td>Not stored; only passed between your tablets while they connect.</td>
+        </tr>
+        <tr>
+          <td>Subscription details (Android app): a random device identifier, the device name, the Google Play purchase token, and the subscription’s status and expiry</td>
+          <td>To check your subscription with Google Play and make sure it’s used on one head tablet at a time.</td>
+          <td>While you have an account with us; deleted on request.</td>
+        </tr>
+        <tr>
+          <td>Cloud backups (subscribers): your menu, settings and order history</td>
+          <td>So you can restore everything on a new tablet. Backups are encrypted before they are stored, and only your current head tablet can read or write them.</td>
+          <td>The latest 60 backups; deleted on request.</td>
+        </tr>
+        <tr>
+          <td>Server logs (IP address, time, request path)</td>
+          <td>Security and fixing problems.</td>
+          <td>Kept briefly by our hosting provider.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Payments</h2>
+    <p>Subscriptions are sold through Google Play. Google processes the payment; we never see your card or billing details. We only receive a purchase token and the subscription status, as described above.</p>
+
+    <h2>Sheffield, the menu helper</h2>
+    <p>Sheffield gives you instructions to paste into a chat assistant of your choice (for example ChatGPT, Claude or Gemini) to turn photos of your menu into a file Yes Chef can import. Anything you share with that assistant is handled by its provider under its own terms. Yes Chef itself sends nothing to any assistant.</p>
+
+    <h2>Service providers</h2>
+    <p>Our website, relay and servers run on Cloudflare. Subscriptions are handled by Google Play. These providers process data only to run the service for us.</p>
+
+    <h2>Your choices and rights</h2>
+    <ul>
+      <li>Export or clear all data on a tablet at any time in Settings.</li>
+      <li>Ask us to delete your subscription record and cloud backups by emailing <a href="mailto:support@yes-chef.win">support@yes-chef.win</a>.</li>
+      <li>Cancel your subscription at any time in Google Play.</li>
+    </ul>
+    <p>Depending on where you live, you may have further rights (such as access or correction). Email us and we’ll help.</p>
+
+    <h2>Children</h2>
+    <p>Yes Chef is a business tool and isn’t directed at children.</p>
+
+    <h2>Changes</h2>
+    <p>If we change this policy, we’ll update the date above and, for significant changes, tell you in the app.</p>
+  </main>
+  <footer><div class="wrap">© 2026 Yes Chef · <a href="./">yes-chef.win</a></div></footer>
+</body>
+</html>
