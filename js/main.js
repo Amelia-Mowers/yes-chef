@@ -1,7 +1,7 @@
 // App shell: role choice, tabs, connection badge.
 
 import {h, clear, toast} from './ui.js'
-import {state, boot, subscribe, chooseRole, pairKitchen, setHooks, isClient, switchClientRole} from './store.js'
+import {state, boot, subscribe, chooseRole, pairKitchen, setHooks, isClient} from './store.js'
 import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
@@ -111,7 +111,7 @@ function render() {
     renderedRole = null
     current?.view.destroy?.()
     current = null
-    return renderRoleChoice()
+    return pendingPair ? renderPairChoice() : renderRoleChoice()
   }
   const paired = Boolean(state.pairing)
   if (state.role !== renderedRole) {
@@ -129,23 +129,39 @@ function render() {
 }
 
 // A pairing link (the head's QR code) opened from the camera app. With the
-// Android app installed, Android opens it in the app. A new tablet pairs as a
-// kitchen straight away, then gets a banner to switch to order taker (and, in
-// an Android browser, a note about the app).
-function showPairedBanner() {
+// Android app installed, Android opens it in the app; otherwise it lands here
+// in the browser, and a new tablet chooses its role before pairing.
+let pendingPair = null
+
+function renderPairChoice() {
   const androidBrowser = /Android/i.test(navigator.userAgent) && !inAndroidApp()
-  const banner = h('div', {class: 'update-banner paired', role: 'status'},
-    h('span', null, 'Paired as a kitchen.'),
-    androidBrowser && h('span', {class: 'small'}, PLAY_PUBLIC ? 'Tip: the free Android app works best.' : 'The Android app is still in testing; the browser works just as well.'),
-    androidBrowser && PLAY_PUBLIC && h('a', {class: 'btn small', href: PLAY_URL}, 'Get the app'),
-    h('button', {class: 'btn small', onclick: async () => {
-      banner.remove()
-      await switchClientRole('taker')
-      toast('This tablet is now an order taker.')
-    }}, 'Make this an order taker'),
-    h('button', {class: 'btn primary small', onclick: () => banner.remove()}, 'OK')
+  const pairAs = async role => {
+    const link = pendingPair
+    pendingPair = null
+    await chooseRole(role)
+    await pairKitchen(link)
+    toast('Paired. Waiting for the head device…')
+  }
+  clear(app,
+    h('main', {class: 'role-screen'},
+      h('div', {class: 'brand big'}, h('img', {src: 'icons/icon.svg', alt: ''}), 'Yes Chef'),
+      h('h1', null, 'Pair this tablet'),
+      h('p', {class: 'muted'}, 'It will join your head tablet. What is this tablet for?'),
+      androidBrowser && h('div', {class: 'app-card'},
+        PLAY_PUBLIC
+          ? [h('p', null, 'Get the free Yes Chef app for this tablet, then scan the code again.'), h('a', {class: 'btn primary', href: PLAY_URL}, 'Get it on Google Play')]
+          : h('p', null, 'The Yes Chef Android app is still in testing and isn’t on Google Play yet. This tablet works just as well in the browser.')
+      ),
+      h('div', {class: 'role-btns'},
+        h('button', {class: 'role-btn', onclick: () => pairAs('kitchen')}, h('strong', null, 'Kitchen'), h('span', null, 'Show tickets, mark them done')),
+        h('button', {class: 'role-btn', onclick: () => pairAs('taker')}, h('strong', null, 'Order taker'), h('span', null, 'Take orders and send them through the head'))
+      ),
+      h('button', {class: 'btn ghost', onclick: () => {
+        pendingPair = null
+        renderRoleChoice()
+      }}, 'Not now')
+    )
   )
-  document.body.append(banner)
 }
 
 function readPairingHash() {
@@ -166,12 +182,10 @@ async function start() {
   const link = readPairingHash()
   if (link) {
     if (state.role === 'head') toast('This is the head device. Open the pairing link on a kitchen or order-taker tablet.')
+    else if (!state.role) pendingPair = link // render() asks which role first
     else {
-      const fresh = !state.role
-      if (fresh) await chooseRole('kitchen')
       await pairKitchen(link)
-      if (fresh) showPairedBanner()
-      else toast('Paired. Waiting for the head device…')
+      toast('Paired. Waiting for the head device…')
     }
   }
   render()

@@ -245,7 +245,7 @@ try {
     }
   })
 
-  await step('scanning the QR link pairs a new tablet as a kitchen, with a switch to order taker', async () => {
+  await step('scanning the QR link on a new tablet asks its role (and mentions the app on Android)', async () => {
     await head.locator('.tabs button', {hasText: 'Settings'}).click()
     const code = (await head.locator('.code').textContent()).trim()
     const link = `${URL}#pair=${code}`
@@ -254,19 +254,16 @@ try {
     try {
       const tab = await androidCtx.newPage()
       await tab.goto(link)
-      await tab.locator('.tabs button', {hasText: 'Tickets'}).waitFor() // straight to the kitchen
-      const banner = tab.locator('.update-banner.paired')
-      await banner.getByText('Paired as a kitchen.').waitFor()
-      await banner.getByText('still in testing').waitFor()
+      await tab.getByRole('heading', {name: 'Pair this tablet'}).waitFor()
+      await tab.getByText('isn’t on Google Play yet').waitFor()
+      await shot(tab, '19-pair-link-android')
+      await tab.getByRole('button', {name: /Order taker/}).click()
       await tab.locator('.badge.ok').waitFor({timeout: 60000})
-      await shot(tab, '19-paired-banner')
-      await banner.getByRole('button', {name: 'Make this an order taker'}).click()
       await tab.locator('.tabs button', {hasText: 'Order'}).waitFor()
-      await head.locator('li', {hasText: '· order taker'}).last().waitFor({timeout: 15000})
       const desk = await desktopCtx.newPage()
       await desk.goto(link)
-      await desk.locator('.update-banner.paired').getByText('Paired as a kitchen.').waitFor()
-      assert((await desk.getByText('still in testing').count()) === 0, 'no app note outside Android')
+      await desk.getByRole('heading', {name: 'Pair this tablet'}).waitFor()
+      assert((await desk.locator('.app-card').count()) === 0, 'no app card outside Android')
     } finally {
       await androidCtx.close()
       await desktopCtx.close()

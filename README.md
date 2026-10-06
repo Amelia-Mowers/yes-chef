@@ -43,7 +43,7 @@ Browser data (IndexedDB) belongs to one address, so moving address means Export 
 - **Kitchen**: shows tickets and marks them Started / Done / Picked up.
 - **Order taker**: a second ordering screen. Orders, changes and undos go to the head as requests; the head numbers them and broadcasts. Orders queue while the head is offline.
 
-Kitchens and order takers pair the same way (QR or typed code from the head's Settings), and any number can join. Scanning the QR with a tablet's camera opens the Android app if it's installed (verified app link); otherwise it opens in the browser. Either way a new tablet pairs as a kitchen immediately, with a banner offering **Make this an order taker**; in Android browsers the banner also mentions the app (`js/config.js` → `PLAY_PUBLIC`).
+Kitchens and order takers pair the same way (QR or typed code from the head's Settings), and any number can join. Scanning the QR with a tablet's camera opens the Android app if it's installed (verified app link); otherwise the browser asks whether the tablet is a kitchen or an order taker, and on Android mentions the app (`js/config.js` → `PLAY_PUBLIC`).
 
 ## Plates
 

@@ -382,17 +382,6 @@ export async function unpairKitchen() {
   emit()
 }
 
-// Switches a paired tablet between kitchen and order taker without re-pairing.
-export async function switchClientRole(role) {
-  if (!isClient(role) || state.role === role) return
-  state.role = role
-  await kv.set('role', role)
-  if (state.pairing?.name === ROLE_LABEL.kitchen || state.pairing?.name === ROLE_LABEL.taker) state.pairing = {...state.pairing, name: ROLE_LABEL[role]}
-  await kv.set('pairing', state.pairing)
-  if (state.headPeer) sayHello(state.headPeer) // tell the head the new role
-  emit()
-}
-
 export async function renameKitchen(name) {
   state.pairing = {...state.pairing, name}
   await kv.set('pairing', state.pairing)
