@@ -140,6 +140,16 @@ try {
     await shot(head, '09-history')
   })
 
+  await step('the head has its own kitchen view that works like a kitchen', async () => {
+    await head.locator('.tabs button', {hasText: 'Kitchen'}).click()
+    await head.getByRole('button', {name: '↶ Recall'}).click() // Sam was marked done on the kitchen tablet
+    await head.locator('.card', {hasText: 'Sam'}).waitFor({timeout: 15000})
+    await kit.locator('.card', {hasText: 'Sam'}).waitFor({timeout: 15000})
+    await head.locator('.card', {hasText: 'Sam'}).getByRole('button', {name: 'Done'}).click()
+    await kit.locator('.card', {hasText: 'Sam'}).waitFor({state: 'detached', timeout: 15000})
+    await head.locator('.tabs button', {hasText: 'Order'}).click()
+  })
+
   await step('kitchen Recall brings the ticket back', async () => {
     await kit.getByRole('button', {name: '↶ Recall'}).click()
     await kit.locator('.card', {hasText: 'Sam'}).waitFor({timeout: 15000})

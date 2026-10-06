@@ -22,6 +22,9 @@ import {pairView, waitingView} from './views/pair.js'
 const TABS = {
   head: [
     ['order', 'Order', orderView],
+    // The kitchen screen on the head itself: one-tablet setups, and the counter
+    // seeing what's ready.
+    ['tickets', 'Kitchen', kitchenView],
     ['history', 'History', historyView],
     ['menu', 'Menu', menuView],
     ['settings', 'Settings', settingsView]

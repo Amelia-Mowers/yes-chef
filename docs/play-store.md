@@ -78,7 +78,8 @@ UNDO ANYTHING
 • Every order and change is kept in History, filterable by status, time or name
 
 AS MANY SCREENS AS YOU NEED
-• One head tablet takes orders and owns the menu
+• One head tablet takes orders and owns the menu, and has its own kitchen view
+• Running on a single tablet? Take orders and follow tickets on the same device
 • Add any number of kitchen screens and extra order-taking tablets for free
 • Pair a tablet by scanning a QR code
 
@@ -120,7 +121,7 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
   2. Tap Monthly or Yearly and confirm the free trial in Google Play (no charge during the trial).
   3. Open Menu → Load test menu, then take orders on the Order tab.
 
-  To see orders arrive in the kitchen, open the app on a second device, choose Kitchen, and scan the QR code shown in the head's Settings (or type the code shown under it).
+  To see the kitchen screen, open the Kitchen tab on the same device and mark orders Done there. With a second device you can also choose Kitchen and scan the QR code shown in the head's Settings (or type the code shown under it).
   ```
 - **Content rating:** questionnaire category *All other app types*; answer No to violence, sexuality, language, controlled substances, gambling; users don't interact or share content with each other publicly; no location sharing; no purchases of digital goods other than the subscription. Expected rating: Everyone.
 - **Target audience:** 18 and over. Not designed for children.

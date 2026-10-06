@@ -99,6 +99,7 @@ export async function setLocal(patch) {
 
 async function startHead() {
   state.menuDraft = (await kv.get('menuDraft')) || state.menu || emptyMenu()
+  state.dismissed = new Set((await kv.get('dismissed')) || [])
   state.room = await kv.get('room')
   state.secret = await kv.get('secret')
   if (!state.room || !state.secret) {

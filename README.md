@@ -39,7 +39,7 @@ Browser data (IndexedDB) belongs to one address, so moving address means Export 
 
 ## Roles
 
-- **Head**: takes orders, owns the menu, settings and the event log. One per restaurant (the paid device).
+- **Head**: takes orders, owns the menu, settings and the event log, and has its own Kitchen tab (enough for one-tablet setups). One per restaurant (the paid device).
 - **Kitchen**: shows tickets and marks them Started / Done / Picked up.
 - **Order taker**: a second ordering screen. Orders, changes and undos go to the head as requests; the head numbers them and broadcasts. Orders queue while the head is offline.
 
