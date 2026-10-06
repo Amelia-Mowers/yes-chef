@@ -124,7 +124,7 @@ function aboutSection() {
   return h('section', {class: 'panel'},
     h('h2', null, 'App version'),
     h('p', {class: 'muted'}, `Yes Chef ${BUILD}. New versions install in the background; you'll be offered a reload.`),
-    h('p', {class: 'small'}, h('a', {href: 'https://yes-chef.win/privacy.html', target: '_blank', rel: 'noopener'}, 'Privacy policy'), ' · ', h('a', {href: 'mailto:support@yes-chef.win'}, 'support@yes-chef.win')),
+    h('p', {class: 'small'}, h('a', {href: 'https://yes-chef.win/privacy', target: '_blank', rel: 'noopener'}, 'Privacy policy'), ' · ', h('a', {href: 'mailto:support@yes-chef.win'}, 'support@yes-chef.win')),
     h('button', {class: 'btn', onclick: async e => {
       const btn = e.currentTarget
       btn.disabled = true

@@ -90,7 +90,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 
 - [x] Developer account bought (personal) and verified.
 - [ ] Closed test: **at least 12 testers opted in for 14 days in a row** (personal accounts; the clock restarts if it drops below 12). Testers can be anyone with a Google account and an Android device, e.g. friends; Google checks they actually used the app, so give them something to do (set up a demo restaurant, send a few orders between two devices). License testers can trial the subscription without being charged.
-- [x] Privacy policy at https://yes-chef.win/privacy.html (linked from the site and the app's Settings).
+- [x] Privacy policy at https://yes-chef.win/privacy (linked from the site and the app's Settings).
 - [x] Store listing text, Data safety / content rating / app access answers, store assets: see [play-store.md](play-store.md) and `docs/store/` (`tools/store-assets.mjs`).
 - [ ] Follow the setup steps in [play-store.md](play-store.md): create app, internal test upload, app signing fingerprint, subscriptions, license testers, service account, Pub/Sub notifications, support email, app content, listing, closed test.
 - [ ] **Real-device testing** on Android tablets: sleep/wake, Wi-Fi drops, a full service of orders, wake lock, reload banner.

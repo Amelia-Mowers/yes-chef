@@ -97,7 +97,7 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
 ```
 
 **Category:** Business · **Tags:** Business, Restaurant, Productivity (choose what Play offers)
-**Contact email:** support@yes-chef.win · **Website:** https://yes-chef.win · **Privacy policy:** https://yes-chef.win/privacy.html
+**Contact email:** support@yes-chef.win · **Website:** https://yes-chef.win · **Privacy policy:** https://yes-chef.win/privacy
 
 **Graphics** (`docs/store/`):
 - App icon: `icon-512.png`
@@ -107,7 +107,7 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
 
 ## App content answers
 
-- **Privacy policy:** https://yes-chef.win/privacy.html
+- **Privacy policy:** https://yes-chef.win/privacy
 - **Ads:** No ads.
 - **App access:** *All or some functionality is restricted* → instructions:
   > Kitchen and Order taker roles need no account. The Head role (taking orders) requires a subscription with a 30-day free trial: choose Head, then Monthly or Yearly to start the free trial. To try everything on one device: choose Head, open Menu → Load test menu, then take orders on the Order tab. To see the kitchen, open the app on a second device, choose Kitchen, and scan the QR code shown in the head's Settings.
