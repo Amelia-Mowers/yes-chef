@@ -18,7 +18,7 @@ Play only lets you create subscriptions after a build with billing is uploaded, 
    - Add yourself as a tester (create an email list), save and roll out.
    - New builds: Actions → Android app → Run workflow, with a higher version code each time.
 
-3. **Send Claude the app signing fingerprint**: Test and release → **App integrity** → *Play app signing* → settings → *App signing key certificate* → SHA-256 certificate fingerprint. (The *Upload key certificate* there should match `~/yes-chef-android-keys/upload-key-sha256.txt`.) It goes into `/.well-known/assetlinks.json` (without it, the Play-installed app shows a browser address bar).
+3. **Send Claude the app signing fingerprint** (done 2026-10-06; it's in `assetlinks.json`): App integrity now opens *Protected with Play*; app signing is under its cards, or replace the end of the Play Console URL with `keymanagement`. Copy *App signing key certificate* → SHA-256. (The *Upload key certificate* there should match `~/yes-chef-android-keys/upload-key-sha256.txt`.) It goes into `/.well-known/assetlinks.json` (without it, the Play-installed app shows a browser address bar).
 
 4. **Create the subscriptions** (Monetize with Play → Products → Subscriptions)
    | Product ID | Name | Base plan ID | Billing | Price | Offer |

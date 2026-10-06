@@ -12,7 +12,7 @@ Last updated 2026-10-05.
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
 | 3 | Own signaling relay | **Done** |
 | 4 | Licensing and backup server | **Live** at api.yes-chef.win; Play verification needs the Google service account |
-| 5 | Android app (TWA) | **Built** (CI produces signed bundle + APK); needs Play Console |
+| 5 | Android app (TWA) | **Done**: in internal testing on Play |
 | 6 | Play Billing | **Built and tested with fake Play**; needs Play Console products |
 | 7 | Play Store setup and closed test | Not started |
 | 8 | Launch | Not started |
@@ -74,7 +74,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 - [x] "Android app" workflow builds a signed Play bundle (.aab) and test APK (run by hand, or push a tag `android-vX.Y.Z`).
 - [x] Upload key generated (kept in `~/yes-chef-android-keys/`, also in repo secrets `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD`). **Back it up.**
 - [x] `https://app.yes-chef.win/.well-known/assetlinks.json` with the upload key fingerprint.
-- [ ] After creating the app in Play Console: add the **Play App Signing** key's SHA-256 to `assetlinks.json` (otherwise the Play-installed app shows a browser bar).
+- [x] Play App Signing key's SHA-256 added to `assetlinks.json` (alongside the upload key's, for test APKs).
 - [ ] Capacitor later only if native features are needed (kitchen printers, stronger keep-alive).
 
 ## 6. Play Billing
