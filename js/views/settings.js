@@ -9,7 +9,7 @@ import {wakeLockOn, applyWakeLock} from '../wake.js'
 import {THEMES, getTheme, setTheme} from '../theme.js'
 import {BUILD} from '../version.js'
 import {license, licenseStatus, onLicense, GRACE_MS, ENFORCE} from '../license.js'
-import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup} from '../cloud.js'
+import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup, deleteCloudData} from '../cloud.js'
 import {checkForUpdate} from '../update.js'
 
 function qrSvg(text) {
@@ -83,6 +83,25 @@ function subscriptionSection() {
             fill()
           }}, 'Back up now'),
           h('button', {class: 'btn', onclick: openCloudRestore}, 'Restore from cloud')
+        ),
+        h('p', {class: 'small'},
+          h('button', {class: 'btn small danger', onclick: async () => {
+            const ok = await confirmDialog({
+              title: 'Delete your cloud data?',
+              message: 'This erases all cloud backups and your subscription record from Yes Chef’s servers. Orders and menus on your tablets stay. Your Google Play subscription keeps running until you cancel it in Google Play; use Restore purchase to connect it again.',
+              confirm: 'Delete cloud data',
+              danger: true
+            })
+            if (!ok) return
+            try {
+              const r = await deleteCloudData()
+              toast(`Deleted ${r.backups} cloud backup${r.backups === 1 ? '' : 's'} and your subscription record.`, {duration: 6000})
+            } catch (err) {
+              toast(`Couldn’t delete: ${err.message}`)
+            }
+          }}, 'Delete my cloud data'),
+          ' ',
+          h('a', {href: 'https://yes-chef.win/delete-data', target: '_blank', rel: 'noopener'}, 'What gets deleted')
         )
       )
     }

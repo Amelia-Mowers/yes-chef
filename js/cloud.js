@@ -4,7 +4,7 @@
 
 import {kv} from './db.js'
 import {state, exportAll, importAll} from './store.js'
-import {API_URL, authHeader, isLicensed} from './license.js'
+import {API_URL, authHeader, isLicensed, forgetLicense, license} from './license.js'
 
 const DAY = 86400000
 
@@ -33,6 +33,17 @@ export async function restoreCloudBackup(id) {
 }
 
 export const lastCloudBackup = () => kv.get('cloudBackupAt')
+
+// Erases this account's cloud backups and subscription records on our server.
+// Data on the tablets is untouched. Restore purchase brings the subscription back.
+export async function deleteCloudData() {
+  if (!license.token) throw new Error('No subscription on this tablet')
+  const res = await fetch(`${API_URL}/v1/account/delete`, {method: 'POST', headers: {'content-type': 'application/json', ...authHeader()}, body: '{}'})
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`)
+  await kv.del('cloudBackupAt')
+  await forgetLicense()
+  return res.json()
+}
 
 // Daily automatic backup while the head is open; failures retry next time.
 export async function autoBackup() {

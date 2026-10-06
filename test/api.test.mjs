@@ -117,3 +117,18 @@ test('Play notifications need the shared key; CORS only for allowed origins', as
   const bad = await fetch(`${API}/v1/license/refresh`, {method: 'OPTIONS', headers: {Origin: 'https://evil.example'}})
   assert.equal(bad.headers.get('access-control-allow-origin'), null)
 })
+
+test('deleting the account erases backups and records; the old license stops working', async () => {
+  const act = await activate({purchaseToken: 'test-active-60', deviceId: 'dev_D', deviceName: 'Truck'})
+  const auth = {authorization: `License ${act.data.license}`}
+  await post('/v1/backups', {app: 'yes-chef', events: []}, auth)
+  const del = await post('/v1/account/delete', {}, auth)
+  assert.equal(del.status, 200)
+  assert.deepEqual(await del.json(), {deleted: true, backups: 1})
+  assert.equal((await fetch(`${API}/v1/backups`, {headers: auth})).status, 409, 'license no longer bound to anything')
+  const again = await activate({purchaseToken: 'test-active-60', deviceId: 'dev_D', deviceName: 'Truck'})
+  assert.equal(again.status, 200)
+  assert.notEqual(again.data.account, act.data.account, 'restoring later starts a fresh account')
+  const list = await (await fetch(`${API}/v1/backups`, {headers: {authorization: `License ${again.data.license}`}})).json()
+  assert.deepEqual(list.backups, [])
+})

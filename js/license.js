@@ -105,6 +105,14 @@ export async function refreshLicense({force = false} = {}) {
   }
 }
 
+// Drops the license on this tablet (after deleting the account's cloud data).
+export async function forgetLicense() {
+  Object.assign(license, {token: null, claims: null, problem: null})
+  await kv.del('license')
+  await kv.del('licenseProblem')
+  emit()
+}
+
 export function authHeader() {
   return license.token ? {authorization: `License ${license.token}`} : {}
 }

@@ -6,6 +6,7 @@
 //   POST /v1/backups?reason=…  body: backup JSON      (Authorization: License <token>)
 //   GET  /v1/backups                                  (list)
 //   GET  /v1/backups/:id                              (download)
+//   POST /v1/account/delete                           (erase this account's data)
 //
 // One subscription = one account = one head device at a time. Licenses last 7
 // days and are refreshed by the app; it allows a further offline grace period.
@@ -69,6 +70,7 @@ async function route(request, env) {
   if (m === 'POST' && path === '/v1/license/activate') return activate(env, await body(request))
   if (m === 'POST' && path === '/v1/license/refresh') return refresh(env, await body(request))
   if (m === 'POST' && path === '/v1/play/rtdn') return rtdn(env, url, request)
+  if (m === 'POST' && path === '/v1/account/delete') return deleteAccount(env, request)
   if (path === '/v1/backups' && m === 'POST') return createBackup(env, request, url)
   if (path === '/v1/backups' && m === 'GET') return listBackups(env, request)
   const one = /^\/v1\/backups\/(bk_[a-z0-9]+)$/.exec(path)
@@ -189,6 +191,24 @@ async function rtdn(env, url, request) {
   const token = note.subscriptionNotification?.purchaseToken
   if (token && note.packageName === env.PLAY_PACKAGE_NAME) await syncFromPlay(env, token)
   return new Response(null, {status: 204})
+}
+
+// Erases everything we hold for the account: backups (R2 and their index),
+// the head binding, subscription records and the account itself. Google keeps
+// its own purchase records; the subscription can be restored later, which
+// starts a fresh account.
+async function deleteAccount(env, request) {
+  const {lic} = await authorize(env, licenseFrom(request), {allowExpired: true})
+  const acc = lic.acc
+  const {results} = await env.DB.prepare('SELECT r2_key FROM backups WHERE account_id = ?').bind(acc).all()
+  for (const b of results) await env.BACKUPS.delete(b.r2_key)
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM backups WHERE account_id = ?').bind(acc),
+    env.DB.prepare('DELETE FROM heads WHERE account_id = ?').bind(acc),
+    env.DB.prepare('DELETE FROM subscriptions WHERE account_id = ?').bind(acc),
+    env.DB.prepare('DELETE FROM accounts WHERE id = ?').bind(acc)
+  ])
+  return json({deleted: true, backups: results.length})
 }
 
 // ---------- backups ----------

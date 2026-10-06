@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yes Chef · Delete your data</title>
+  <meta name="description" content="How to delete your Yes Chef data, and what is deleted or kept.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    :root { --bg: #f6f2ec; --surface: #fff; --line: #ddd4c8; --text: #221d17; --muted: #6f6458; --accent: #d0603f; color-scheme: light; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #17140f; --surface: #221e18; --line: #3d362c; --text: #f3ede4; --muted: #a99d8e; --accent: #e9805f; color-scheme: dark; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .wrap { width: min(760px, 100% - 32px); margin: 0 auto; }
+    header { border-bottom: 1px solid var(--line); }
+    header .wrap { display: flex; align-items: center; gap: 10px; min-height: 64px; }
+    header a { display: flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; color: inherit; }
+    header img { width: 32px; height: 32px; }
+    main { padding: 32px 0 64px; }
+    h1 { font-size: 2rem; margin: 0 0 4px; }
+    h2 { font-size: 1.2rem; margin: 32px 0 8px; }
+    .updated { color: var(--muted); margin: 0 0 24px; }
+    .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; }
+    .summary ul { margin: 8px 0 0; padding-left: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; margin: 8px 0; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    @media (max-width: 600px) { table, thead, tbody, tr, th, td { display: block; } thead { display: none; } td { border: none; padding: 2px 0; } tr { border-bottom: 1px solid var(--line); padding: 8px 0; } td:first-child { font-weight: 700; } }
+    a { color: var(--accent); }
+    footer { border-top: 1px solid var(--line); padding: 24px 0; color: var(--muted); font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><a href="./"><img src="icon.svg" alt="">Yes Chef</a></div></header>
+  <main class="wrap">
+    <h1>Delete your Yes Chef data</h1>
+    <p class="updated">For the Yes Chef app (Android, and the web app at app.yes-chef.win)</p>
+
+    <div class="summary">
+      <strong>Most of your data never leaves your tablets.</strong> Orders, menus and history live on your own devices. Our servers only hold data for <em>subscribers</em>: cloud backups and a subscription record. Here’s how to delete each.
+    </div>
+
+    <h2>Delete the cloud data we hold (subscribers)</h2>
+    <p><strong>In the app</strong>, on your head tablet:</p>
+    <ol>
+      <li>Open <strong>Settings</strong>.</li>
+      <li>Under <strong>Subscription</strong>, tap <strong>Delete my cloud data</strong> and confirm.</li>
+    </ol>
+    <p>It takes effect immediately.</p>
+    <p><strong>Without the tablet</strong> (lost, broken or already uninstalled): email <a href="mailto:support@yes-chef.win?subject=Delete%20my%20Yes%20Chef%20data">support@yes-chef.win</a> with the subject “Delete my Yes Chef data” and your <strong>Google Play order number</strong> (it starts with GPA. and is in your Google Play receipt email). We delete it within 30 days and reply to confirm.</p>
+
+    <h2>What is deleted</h2>
+    <ul>
+      <li>All cloud backups (menu, settings and order history).</li>
+      <li>Your subscription record: the Google Play purchase token, subscription status and expiry.</li>
+      <li>The head tablet link: the random device identifier and device name.</li>
+    </ul>
+
+    <h2>What is kept</h2>
+    <ul>
+      <li><strong>Data on your tablets</strong> stays until you remove it: Settings → Data → <strong>Clear history</strong>, or uninstall the app.</li>
+      <li><strong>Google Play’s own records</strong> of your purchase are kept by Google under its policies. Deleting your data <strong>does not cancel your subscription</strong>; cancel it in Google Play → Payments &amp; subscriptions.</li>
+      <li><strong>Server logs</strong> (IP address, time, request path) are kept by our hosting provider for a short period for security, then deleted automatically.</li>
+    </ul>
+    <p>If your subscription is still active, you can connect it again later with <strong>Restore purchase</strong>; that starts with no cloud backups.</p>
+    <p>See also our <a href="privacy">privacy policy</a>.</p>
+  </main>
+  <footer><div class="wrap">© 2026 Yes Chef · <a href="./">yes-chef.win</a></div></footer>
+</body>
+</html>

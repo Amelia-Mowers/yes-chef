@@ -128,7 +128,9 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
 - **News app:** No. **Government app:** No. **Financial features:** None. **Health:** No.
 - **Data safety:**
   - Does the app collect or share user data? **Yes.**
-  - Encrypted in transit? **Yes.** Can users request deletion? **Yes** (support@yes-chef.win; describe in the form).
+  - Encrypted in transit? **Yes.** Can users request deletion? **Yes**.
+  - Account creation: **My app does not allow users to create an account**; login with accounts created outside the app: **No**.
+  - Delete data URL: **https://yes-chef.win/delete-data** (in-app: Settings → Subscription → Delete my cloud data; or email with the Google Play order number).
   - Shared with third parties? **No** (Cloudflare and Google act as service providers, which doesn't count as sharing).
   - Collected data types:
     | Type | Collected for | Optional? |

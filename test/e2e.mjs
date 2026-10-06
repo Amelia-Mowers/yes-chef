@@ -294,6 +294,10 @@ try {
     await head.locator('.sheet li').first().getByRole('button', {name: 'Restore'}).click()
     await head.getByRole('button', {name: 'Restore', exact: true}).last().click()
     await head.getByText('Restored from the cloud').waitFor()
+    await head.getByRole('button', {name: 'Delete my cloud data'}).click()
+    await head.getByRole('button', {name: 'Delete cloud data'}).click()
+    await head.getByText(/Deleted \d+ cloud backups? and your subscription record/).waitFor() // restoring itself made a before-import backup
+    await head.getByText('free in the browser during early access').waitFor() // license forgotten on this tablet
   })
 
   await step('Android app: head needs a subscription, trial unlocks it, a second tablet is offered the move', async () => {
