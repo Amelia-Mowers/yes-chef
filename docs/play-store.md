@@ -105,8 +105,9 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
 **Graphics** (`docs/store/`):
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic.png` (1024×500)
-- Phone screenshots: `phone-1-order.png`, `phone-2-choices.png`, `phone-3-kitchen.png` (1080×1920)
-- 10-inch tablet screenshots: `tablet-1-order.png`, `tablet-2-kitchen.png`, `tablet-3-kitchen-dark.png`, `tablet-4-order-timeline.png` (2560×1600). Upload the same ones for 7-inch tablets.
+- Phone screenshots: `phone-1-order.png`, `phone-2-choices.png`, `phone-3-kitchen.png` (1080×1920, 9:16)
+- 7-inch tablet screenshots: `tablet7-1-order.png` … `tablet7-4-order-timeline.png` (1920×1080, 16:9)
+- 10-inch tablet screenshots: `tablet10-1-order.png` … `tablet10-4-order-timeline.png` (2560×1440, 16:9)
 
 ## App content answers
 

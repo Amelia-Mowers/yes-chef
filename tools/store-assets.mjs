@@ -1,6 +1,7 @@
 // Google Play store assets from the real app, into docs/store/:
-// phone screenshots (1080×1920), 10" tablet screenshots (2560×1600) and the
-// 1024×500 feature graphic.   CHROMIUM_PATH=... node tools/store-assets.mjs
+// phone screenshots (1080×1920, 9:16), 7" tablet (1920×1080) and 10" tablet
+// (2560×1440) screenshots (16:9, as Play requires), and the 1024×500 feature
+// graphic.   CHROMIUM_PATH=... node tools/store-assets.mjs
 import {chromium} from 'playwright'
 import {spawn} from 'node:child_process'
 import {copyFileSync, readFileSync} from 'node:fs'
@@ -10,7 +11,16 @@ const server = spawn('node', ['tools/serve.mjs'], {env: {...process.env, PORT: '
 await new Promise(r => setTimeout(r, 500))
 const URL = 'http://localhost:8098/yes-chef/'
 const browser = await chromium.launch({args: ['--disable-features=WebRtcHideLocalIpsWithMdns'], ...(process.env.CHROMIUM_PATH ? {executablePath: process.env.CHROMIUM_PATH} : {})})
-const tablet = {viewport: {width: 1280, height: 800}, deviceScaleFactor: 2}
+const tablet = {viewport: {width: 1280, height: 720}, deviceScaleFactor: 2}
+// Each tablet shot in both Play sizes: 7" = 960×540 CSS px, 10" = 1280×720, both at 2×.
+const SIZES = {tablet7: {width: 960, height: 540}, tablet10: {width: 1280, height: 720}}
+async function tabletShot(p, name) {
+  for (const [prefix, size] of Object.entries(SIZES)) {
+    await p.setViewportSize(size)
+    await p.waitForTimeout(250)
+    await p.screenshot({path: `${OUT}/${prefix}-${name}.png`})
+  }
+}
 const phone = {viewport: {width: 360, height: 640}, deviceScaleFactor: 3, isMobile: true, hasTouch: true}
 const quiet = p => p.addStyleTag({content: '#toasts, .update-banner { display: none !important } input:focus { outline: none !important }'})
 const shot = (p, name) => p.screenshot({path: `${OUT}/${name}.png`})
@@ -63,13 +73,13 @@ try {
   await head.getByLabel('Order name').blur()
   for (const p of [head, kit, kitPhone, dark]) await quiet(p)
   await kit.waitForTimeout(3500) // let new-ticket highlights settle
-  await shot(head, 'tablet-1-order')
-  await shot(kit, 'tablet-2-kitchen')
-  await shot(dark, 'tablet-3-kitchen-dark')
+  await tabletShot(head, '1-order')
+  await tabletShot(kit, '2-kitchen')
+  await tabletShot(dark, '3-kitchen-dark')
   await head.locator('.tabs button', {hasText: 'History'}).click()
   await head.locator('.hist-row', {hasText: 'Table 4'}).click()
   await head.waitForTimeout(400)
-  await shot(head, 'tablet-4-order-timeline')
+  await tabletShot(head, '4-order-timeline')
   await shot(kitPhone, 'phone-3-kitchen')
 
   const ph = await role(phone, 'Head')
@@ -95,7 +105,7 @@ try {
       <div style="font-size:30px;line-height:1.2;font-weight:700">Orders from the front to the kitchen, in a tap.</div>
       <div style="font-size:19px;color:#c9bdae">Tablet tickets over your own Wi-Fi</div>
     </div>
-    <img src="${img('tablet-3-kitchen-dark.png')}" style="position:absolute;left:520px;top:58px;width:600px;border-radius:18px;border:2px solid #3d362c;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <img src="${img('tablet10-3-kitchen-dark.png')}" style="position:absolute;left:520px;top:58px;width:600px;border-radius:18px;border:2px solid #3d362c;box-shadow:0 20px 60px rgba(0,0,0,.5)">
   </body></html>`)
   await fg.waitForTimeout(300)
   await fg.screenshot({path: `${OUT}/feature-graphic.png`})
