@@ -89,6 +89,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 ## 7. Play Store setup and closed test
 
 - [x] Developer account bought (personal) and verified.
+- [ ] Internal testing (up to 100 testers, no review, no time limit; doesn't count toward the requirement below) for you and close testers.
 - [ ] Closed test: **at least 12 testers opted in for 14 days in a row** (personal accounts; the clock restarts if it drops below 12). Testers can be anyone with a Google account and an Android device, e.g. friends; Google checks they actually used the app, so give them something to do (set up a demo restaurant, send a few orders between two devices). License testers can trial the subscription without being charged.
 - [x] Privacy policy at https://yes-chef.win/privacy (linked from the site and the app's Settings).
 - [x] Store listing text, Data safety / content rating / app access answers, store assets: see [play-store.md](play-store.md) and `docs/store/` (`tools/store-assets.mjs`).
@@ -98,6 +99,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 ## 8. Launch
 
 - [ ] Staged rollout, support email, refund policy, simple status page.
+- [ ] Set `PLAY_PUBLIC = true` in `js/config.js` so pairing links on Android browsers offer the Play Store app instead of saying it's in testing.
 - [ ] Update the marketing site with pricing ($19/month or $190/year, 30-day free trial) and a Play Store badge.
 
 ## Decision before launch

@@ -245,6 +245,31 @@ try {
     }
   })
 
+  await step('scanning the QR link on a new tablet asks its role (and mentions the app on Android)', async () => {
+    await head.locator('.tabs button', {hasText: 'Settings'}).click()
+    const code = (await head.locator('.code').textContent()).trim()
+    const link = `${URL}#pair=${code}`
+    const androidCtx = await browser.newContext({viewport: {width: 800, height: 1280}, userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel Tablet) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0 Safari/537.36'})
+    const desktopCtx = await browser.newContext({viewport})
+    try {
+      const tab = await androidCtx.newPage()
+      await tab.goto(link)
+      await tab.getByRole('heading', {name: 'Pair this tablet'}).waitFor()
+      await tab.getByText('isn’t on Google Play yet').waitFor()
+      await shot(tab, '19-pair-link-android')
+      await tab.getByRole('button', {name: /Order taker/}).click()
+      await tab.locator('.badge.ok').waitFor({timeout: 60000})
+      await tab.locator('.tabs button', {hasText: 'Order'}).waitFor()
+      const desk = await desktopCtx.newPage()
+      await desk.goto(link)
+      await desk.getByRole('heading', {name: 'Pair this tablet'}).waitFor()
+      assert((await desk.locator('.app-card').count()) === 0, 'no app card outside Android')
+    } finally {
+      await androidCtx.close()
+      await desktopCtx.close()
+    }
+  })
+
   await step('a licensed head backs up to the cloud and restores', async () => {
     await head.locator('.tabs button', {hasText: 'Settings'}).click()
     await head.getByText('free in the browser during early access').waitFor()

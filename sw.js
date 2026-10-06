@@ -20,6 +20,7 @@ const SHELL = [
   'js/cloud.js',
   'js/billing.js',
   'js/platform.js',
+  'js/config.js',
   'js/views/subscribe.js',
   'js/version.js',
   'js/theme.js',

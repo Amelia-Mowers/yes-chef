@@ -6,6 +6,8 @@ import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
 import {registerServiceWorker} from './update.js'
+import {PLAY_PUBLIC, PLAY_URL} from './config.js'
+import {inAndroidApp} from './platform.js'
 import {announceMove} from './moved.js'
 import {loadLicense, activateLicense, isLicensed, ENFORCE, onLicense, licenseStatus} from './license.js'
 import {subscribeView} from './views/subscribe.js'
@@ -109,7 +111,7 @@ function render() {
     renderedRole = null
     current?.view.destroy?.()
     current = null
-    return renderRoleChoice()
+    return pendingPair ? renderPairChoice() : renderRoleChoice()
   }
   const paired = Boolean(state.pairing)
   if (state.role !== renderedRole) {
@@ -126,7 +128,42 @@ function render() {
   renderBadge()
 }
 
-// A pairing link opened directly (e.g. from the tablet's camera app).
+// A pairing link (the head's QR code) opened from the camera app. With the
+// Android app installed, Android opens it in the app; otherwise it lands here
+// in the browser, and a new tablet chooses its role before pairing.
+let pendingPair = null
+
+function renderPairChoice() {
+  const androidBrowser = /Android/i.test(navigator.userAgent) && !inAndroidApp()
+  const pairAs = async role => {
+    const link = pendingPair
+    pendingPair = null
+    await chooseRole(role)
+    await pairKitchen(link)
+    toast('Paired. Waiting for the head device…')
+  }
+  clear(app,
+    h('main', {class: 'role-screen'},
+      h('div', {class: 'brand big'}, h('img', {src: 'icons/icon.svg', alt: ''}), 'Yes Chef'),
+      h('h1', null, 'Pair this tablet'),
+      h('p', {class: 'muted'}, 'It will join your head tablet. What is this tablet for?'),
+      androidBrowser && h('div', {class: 'app-card'},
+        PLAY_PUBLIC
+          ? [h('p', null, 'Get the free Yes Chef app for this tablet, then scan the code again.'), h('a', {class: 'btn primary', href: PLAY_URL}, 'Get it on Google Play')]
+          : h('p', null, 'The Yes Chef Android app is still in testing and isn’t on Google Play yet. This tablet works just as well in the browser.')
+      ),
+      h('div', {class: 'role-btns'},
+        h('button', {class: 'role-btn', onclick: () => pairAs('kitchen')}, h('strong', null, 'Kitchen'), h('span', null, 'Show tickets, mark them done')),
+        h('button', {class: 'role-btn', onclick: () => pairAs('taker')}, h('strong', null, 'Order taker'), h('span', null, 'Take orders and send them through the head'))
+      ),
+      h('button', {class: 'btn ghost', onclick: () => {
+        pendingPair = null
+        renderRoleChoice()
+      }}, 'Not now')
+    )
+  )
+}
+
 function readPairingHash() {
   const parsed = parsePairing(location.hash)
   if (!parsed) return null
@@ -145,8 +182,8 @@ async function start() {
   const link = readPairingHash()
   if (link) {
     if (state.role === 'head') toast('This is the head device. Open the pairing link on a kitchen or order-taker tablet.')
+    else if (!state.role) pendingPair = link // render() asks which role first
     else {
-      if (!state.role) await chooseRole('kitchen')
       await pairKitchen(link)
       toast('Paired. Waiting for the head device…')
     }
