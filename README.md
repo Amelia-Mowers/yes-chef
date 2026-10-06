@@ -49,6 +49,10 @@ Kitchens and order takers pair the same way (QR or typed code from the head's Se
 
 When adding an item, pick **No plate**, an existing plate, or **+ New plate** (the last plate used is preselected). Lines on the same plate are grouped under a plate heading on the head's ticket, the kitchen card and the order's History detail; unplated lines come first. Each ticket line has a plate button to move it. Plates renumber themselves (Plate 1, 2, …) when one empties, and moving an item between plates shows up in the kitchen's “CHANGED” list.
 
+## Privacy switches
+
+Settings → Privacy has two per-device switches, **Crash and error reports** and **Usage analytics**, both off by default. Nothing is collected today; any future reporting must go through `js/telemetry.js`, which checks them.
+
 ## Sheffield, the menu butler
 
 Menu → **Sheffield** opens a guide for building the menu with any chat assistant (ChatGPT, Claude, Gemini…):

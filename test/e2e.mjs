@@ -162,6 +162,20 @@ try {
     await shot(kit, '10-started')
   })
 
+  await step('privacy switches default off and stick after a reload', async () => {
+    await kit.locator('.tabs button', {hasText: 'Settings'}).click()
+    const crash = kit.locator('.toggle', {hasText: 'Crash and error reports'}).locator('input')
+    assert(!(await crash.isChecked()), 'crash reports are off by default')
+    assert(!(await kit.locator('.toggle', {hasText: 'Usage analytics'}).locator('input').isChecked()), 'analytics off by default')
+    await kit.locator('.toggle', {hasText: 'Crash and error reports'}).click()
+    await kit.waitForTimeout(300) // the setting is saved to IndexedDB asynchronously
+    await kit.reload()
+    await kit.locator('.tabs button', {hasText: 'Settings'}).click()
+    assert(await kit.locator('.toggle', {hasText: 'Crash and error reports'}).locator('input').isChecked(), 'crash reports stay on after reload')
+    await kit.locator('.toggle', {hasText: 'Crash and error reports'}).click() // back off
+    await kit.locator('.tabs button', {hasText: 'Tickets'}).click()
+  })
+
   await step('kitchen reload keeps tickets and reconnects', async () => {
     await kit.reload()
     await kit.locator('.card', {hasText: 'Sam'}).waitFor({timeout: 15000})

@@ -8,6 +8,7 @@ import {qrcode} from '../../vendor/qr.js'
 import {wakeLockOn, applyWakeLock} from '../wake.js'
 import {THEMES, getTheme, setTheme} from '../theme.js'
 import {BUILD} from '../version.js'
+import {KINDS, telemetryAllowed, setTelemetry} from '../telemetry.js'
 import {license, licenseStatus, onLicense, GRACE_MS, ENFORCE} from '../license.js'
 import {backupNow, listCloudBackups, restoreCloudBackup, lastCloudBackup, deleteCloudData} from '../cloud.js'
 import {checkForUpdate} from '../update.js'
@@ -139,6 +140,14 @@ async function openCloudRestore() {
   )
 }
 
+function privacySection() {
+  return h('section', {class: 'panel'},
+    h('h2', null, 'Privacy'),
+    h('p', {class: 'muted small'}, 'Yes Chef doesn’t collect analytics or crash reports today. If it ever does, it will only send what you allow here.'),
+    Object.entries(KINDS).map(([kind, {label, hint}]) => toggle(label, telemetryAllowed(kind), v => setTelemetry(kind, v), hint))
+  )
+}
+
 function aboutSection() {
   return h('section', {class: 'panel'},
     h('h2', null, 'App version'),
@@ -237,6 +246,7 @@ export function settingsView() {
       ),
       subscriptionSection(),
       screenSection(),
+      privacySection(),
       aboutSection(),
       roleSection()
     )
@@ -264,6 +274,7 @@ export function settingsView() {
         }}, 'Unpair')
       ),
       screenSection(),
+      privacySection(),
       aboutSection(),
       roleSection()
     )

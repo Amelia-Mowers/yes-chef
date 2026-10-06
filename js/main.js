@@ -5,6 +5,7 @@ import {state, boot, subscribe, chooseRole, pairKitchen, setHooks, isClient} fro
 import {parsePairing} from './net.js'
 import {applyWakeLock} from './wake.js'
 import {applyTheme} from './theme.js'
+import './telemetry.js'
 import {registerServiceWorker} from './update.js'
 import {PLAY_PUBLIC, PLAY_URL} from './config.js'
 import {inAndroidApp} from './platform.js'

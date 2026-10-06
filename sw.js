@@ -21,6 +21,7 @@ const SHELL = [
   'js/billing.js',
   'js/platform.js',
   'js/config.js',
+  'js/telemetry.js',
   'js/views/subscribe.js',
   'js/version.js',
   'js/theme.js',

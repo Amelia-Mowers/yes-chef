@@ -114,6 +114,11 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 - Play Console: one subscription product with two base plans (monthly $19, yearly $190) and a 30-day free-trial offer on both.
 - Context: Square KDS is about $20–30 per kitchen screen per month (or bundled in $49–60+/month plans), so Yes Chef is cheaper from the second screen on. After Google's 15% cut, $19 nets about $16.
 
+## Analytics and crash reporting (not built)
+
+- Settings → Privacy has per-device switches for **crash/error reports** and **usage analytics**, **off by default** (opt-in), promised in the privacy policy.
+- Any future collection must go through `js/telemetry.js` (`telemetryAllowed()`, `reportError()`, `track()`), which already gate on those switches. Adding a provider also means updating the privacy policy and the Play Data safety form first.
+
 ## Later
 
 - iOS: likely Capacitor + StoreKit (Apple often rejects pure web wrappers under guideline 4.2).
