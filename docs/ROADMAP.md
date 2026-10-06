@@ -99,7 +99,7 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 ## 8. Launch
 
 - [ ] Staged rollout, support email, refund policy, simple status page.
-- [ ] Set `PLAY_PUBLIC = true` in `js/config.js` so pairing links on Android browsers offer the Play Store app instead of saying it's in testing.
+- [ ] Set `PLAY_PUBLIC = true` in `js/config.js` so the paired banner in Android browsers offers the Play Store app instead of saying it's in testing.
 - [ ] Update the marketing site with pricing ($19/month or $190/year, 30-day free trial) and a Play Store badge.
 
 ## Decision before launch

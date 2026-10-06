@@ -109,8 +109,19 @@ Yes Chef routes orders; it doesn't take payments, so it works alongside the till
 
 - **Privacy policy:** https://yes-chef.win/privacy
 - **Ads:** No ads.
-- **App access:** *All or some functionality is restricted* → instructions:
-  > Kitchen and Order taker roles need no account. The Head role (taking orders) requires a subscription with a 30-day free trial: choose Head, then Monthly or Yearly to start the free trial. To try everything on one device: choose Head, open Menu → Load test menu, then take orders on the Order tab. To see the kitchen, open the app on a second device, choose Kitchen, and scan the QR code shown in the head's Settings.
+- **App access:** *All or some functionality is restricted* → Add sign-in details: Name `Reviewer access`, leave username and password empty, and under *Any other information required to access your app*:
+  ```
+  No account or password is needed.
+
+  Kitchen and Order taker roles are free: open the app, choose Kitchen (or Order taker).
+
+  The Head role (taking orders) needs a subscription with a 30-day free trial:
+  1. Open the app and choose Head.
+  2. Tap Monthly or Yearly and confirm the free trial in Google Play (no charge during the trial).
+  3. Open Menu → Load test menu, then take orders on the Order tab.
+
+  To see orders arrive in the kitchen, open the app on a second device, choose Kitchen, and scan the QR code shown in the head's Settings (or type the code shown under it).
+  ```
 - **Content rating:** questionnaire category *All other app types*; answer No to violence, sexuality, language, controlled substances, gambling; users don't interact or share content with each other publicly; no location sharing; no purchases of digital goods other than the subscription. Expected rating: Everyone.
 - **Target audience:** 18 and over. Not designed for children.
 - **News app:** No. **Government app:** No. **Financial features:** None. **Health:** No.
