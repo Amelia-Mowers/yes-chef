@@ -11,7 +11,7 @@ Last updated 2026-10-05.
 | 1 | Order-taker role | **Done** |
 | 2 | Own domain | **Done** (yes-chef.win, app.yes-chef.win) |
 | 3 | Own signaling relay | **Done** |
-| 4 | Licensing and backup server | **Built and tested**; goes live when R2 is enabled |
+| 4 | Licensing and backup server | **Live** at api.yes-chef.win; Play verification needs the Google service account |
 | 5 | Android app (TWA) | **Built** (CI produces signed bundle + APK); needs Play Console |
 | 6 | Play Billing | **Built and tested with fake Play**; needs Play Console products |
 | 7 | Play Store setup and closed test | Not started |
@@ -64,7 +64,9 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 - [x] Only the bound head can read or write; a moved/old head is refused.
 - [x] **Never back up Sheffield conversations**: the server keeps only menu, settings and events, whatever the client sends.
 
-**To go live** (needs you): enable R2 in the Cloudflare dashboard. Then: create the bucket, set the secrets `LICENSE_PRIVATE_KEY` and `BACKUP_MASTER_KEY`, deploy, set the repo variable `DEPLOY_API=true`. Google secrets (`GOOGLE_SERVICE_ACCOUNT`, `RTDN_SECRET`) come with the Play Console setup.
+**Live** since 2026-10-05: bucket `yes-chef-backups`, D1 migrated, secrets `LICENSE_PRIVATE_KEY`, `BACKUP_MASTER_KEY`, `RTDN_SECRET` set (copies in `~/yes-chef-android-keys/`, backed up offline). CI deploys it (`DEPLOY_API=true`) once the CI token has **D1 Edit** and **Workers R2 Storage Edit**.
+- [ ] `GOOGLE_SERVICE_ACCOUNT` secret (Play Developer API access) — needed before real purchases can be verified.
+- [ ] Pub/Sub push subscription to `https://api.yes-chef.win/v1/play/rtdn?key=<RTDN_SECRET>` for renewals/cancellations.
 
 ## 5. Android app (Trusted Web Activity)
 
@@ -86,8 +88,8 @@ Code in `api/` (Worker `yes-chef-api` at api.yes-chef.win, D1 `yes-chef`, R2 `ye
 
 ## 7. Play Store setup and closed test
 
-- [ ] Developer account ($25) and identity verification. Consider an organisation account (exempt from the closed-test rule below).
-- [ ] New personal accounts: closed test with 12 testers for 14 days before production. Confirm current numbers in Play Console.
+- [x] Developer account bought (personal); identity verification pending.
+- [ ] Closed test: **at least 12 testers opted in for 14 days in a row** (personal accounts; the clock restarts if it drops below 12). Testers can be anyone with a Google account and an Android device, e.g. friends; Google checks they actually used the app, so give them something to do (set up a demo restaurant, send a few orders between two devices). License testers can trial the subscription without being charged.
 - [ ] Privacy policy (yes-chef.win/privacy), Data safety form (orders stay on devices; pairing metadata via our relay; backups if enabled).
 - [ ] Content rating, store listing (screenshots from `tools/screenshots.mjs`), reviewer instructions with a license-tester account.
 - [ ] **Real-device testing** on Android tablets: sleep/wake, Wi-Fi drops, a full service of orders, wake lock, reload banner.
